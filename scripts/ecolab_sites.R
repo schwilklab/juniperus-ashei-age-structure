@@ -1,21 +1,49 @@
 ## ecolab_sites.R
+## Alex Bowers, Dylan Schwilk
 
 
 # needed packages
 
 library(sf)
 library(raster)
-library(ts)
-library(tidyr)
-
-
-# downloaded kml files of properties
+#library(ts) # What is this? Not used.
+library(dplyr)
+#library(tidyr)
+library(geosphere)
 
 #setwd("~/Downloads")
-## DWS: Don;t use setwd() in code!
+## DWS: Don't use setwd() in code!
 
-p2022 <- st_read("2022Properties.kml")
-p2021 <- st_read("2021Properties.kml")
+
+
+
+
+## Data below provided by the EcoLab program through Brown and Gresham
+p2022 <- st_read("./data/2022Properties.kml")
+p2021 <- st_read("./data/2021Properties.kml")
+sites <- rbind(p2022, p2021)
+
+# Clean out NA stuff that was in kml for some reason:
+sites <- dplyr::select(sites, Name, geometry)
+## DWS but these layers are MULTIPOLYGONS But that is weird, each site should
+## be just one polygon.
+sites <- st_cast(sites, "POLYGON")
+
+
+# Just show the polygon for one site
+ggplot(dplyr::filter(sites, Name=="Bandera 2022-35")) + geom_sf()
+ggplot(dplyr::filter(sites, Name=="Edwards 2022-25")) + geom_sf()
+
+# Get centroids
+sites <- sites %>% mutate(centroid = st_centroid(geometry))
+
+# in own matrix
+centroids <- st_coordinates(sites$centroid)
+
+destPoint(centroids, 0, 1500)
+destPoint(centroids, 0, -1500)
+destPoint(centroids, 90, 1500)
+destPoint(centroids, 90, -1500)
 
 
 # Finds min and max boundaries of each site
