@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document id="All_Ecolab_Properties" xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+	<name>2021Properties</name>
+	<Snippet maxLines="0"></Snippet>
+	<Style id="PolyStyle00">
+		<LabelStyle>
+			<color>00000000</color>
+			<scale>0</scale>
+		</LabelStyle>
+		<LineStyle>
+			<color>ff0000ff</color>
+			<width>2</width>
+		</LineStyle>
+		<PolyStyle>
+			<color>00ffffff</color>
+		</PolyStyle>
+	</Style>
+	<Folder id="FeatureLayer0">
+		<name>All_Ecolab_Properties</name>
+		<open>1</open>
+		<Snippet maxLines="0"></Snippet>
+		<Placemark id="ID_00018">
+			<name>Uvalde 2021-03</name>
+			<Snippet maxLines="0"></Snippet>
+			<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>Uvalde 2021-03</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>Name</td>
+
+<td>Uvalde 2021-03</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Acreage</td>
+
+<td>54.5</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+			<styleUrl>#PolyStyle00</styleUrl>
+			<MultiGeometry>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<coordinates>
+								-99.62578232672392,29.44794685669779,0 -99.62516720951488,29.44914169472207,0 -99.625035133325,29.44942236137737,0 -99.62477067397165,29.44993898184668,0 -99.62481796006814,29.44995786153773,0 -99.624723354374,29.45013347964543,0 -99.62493684054542,29.45022561210826,0 -99.62793995133994,29.45150557493328,0 -99.63114990826507,29.4528735877067,0 -99.63141479234905,29.45267295878892,0 -99.63172595849873,29.45243727205875,0 -99.63207415433099,29.45218117278912,0 -99.63267086816454,29.4521596538863,0 -99.6315698230392,29.45113737944313,0 -99.62952484234337,29.4492352982125,0 -99.62860487914895,29.44837723590349,0 -99.627722464881,29.44803708844737,0 -99.62782660487048,29.44765578672821,0 -99.62654737425915,29.44646074496933,0 -99.62578232672392,29.44794685669779,0 
+							</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</MultiGeometry>
+		</Placemark>
+		<Placemark id="ID_00027">
+			<name>Kerr 2021-36</name>
+			<Snippet maxLines="0"></Snippet>
+			<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>Kerr 2021-36</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>Name</td>
+
+<td>Kerr 2021-36</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Acreage</td>
+
+<td>484.7</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+			<styleUrl>#PolyStyle00</styleUrl>
+			<MultiGeometry>
+				<Polygon>
+					<outerBoundaryIs>
+						<LinearRing>
+							<coordinates>
+								-99.40942233951581,30.07469952094235,0 -99.4096629674152,30.0747916134005,0 -99.41431934617151,30.07494023799657,0 -99.41584526002207,30.07491340474385,0 -99.41599300909778,30.07214968931311,0 -99.41371269214935,30.07018045398443,0 -99.41344240053905,30.06994702776113,0 -99.41025723388047,30.06674693599038,0 -99.41041756876722,30.06665821618767,0 -99.41282578399175,30.06482874943952,0 -99.41280832336307,30.06481296624694,0 -99.41273218337508,30.06474414091254,0 -99.41199152417255,30.06388001516513,0 -99.41177573508612,30.06362825076744,0 -99.41209073384644,30.06323757901726,0 -99.41203521870661,30.06261934586923,0 -99.41237667556263,30.06229734249711,0 -99.41258586432109,30.06195247509299,0 -99.4126894522085,30.06151690105143,0 -99.41270041467885,30.06133203262272,0 -99.41270299106424,30.06128858499765,0 -99.41271391817159,30.0611043121583,0 -99.41255567769906,30.06094438735254,0 -99.41256271944813,30.06093749385915,0 -99.41288018517214,30.06062671061684,0 -99.41301355547375,30.06049614688202,0 -99.41316102640634,30.06035177868664,0 -99.41300503317207,30.05988814743118,0 -99.4107907108566,30.06070386743796,0 -99.41065805951389,30.06075291346882,0 -99.41002140349686,30.06098760883712,0 -99.40974350065704,30.06109005297165,0 -99.40839497851221,30.06155168121986,0 -99.40755489083654,30.06156667436331,0 -99.40748662663957,30.06156647922276,0 -99.40547585303925,30.06156071531099,0 -99.40476054523108,30.06074540310706,0 -99.40383444590881,30.06049917324553,0 -99.40356311883413,30.06042703174841,0 -99.40295177424692,30.06066425216764,0 -99.40224085001272,30.06092654762892,0 -99.40150164274444,30.06123847205913,0 -99.40006391047318,30.06150467257061,0 -99.39999800590633,30.06573214324323,0 -99.39999733087933,30.06577544192261,0 -99.399664456168,30.06577645420017,0 -99.39961838502285,30.07455934400019,0 -99.40439187946201,30.07466808463667,0 -99.40622475008612,30.07469753124223,0 -99.40639831682439,30.07462697970828,0 -99.40942233951581,30.07469952094235,0 
+							</coordinates>
+						</LinearRing>
+					</outerBoundaryIs>
+				</Polygon>
+			</MultiGeometry>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>
