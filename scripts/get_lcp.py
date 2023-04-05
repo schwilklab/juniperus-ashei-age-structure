@@ -4,6 +4,8 @@ import os
 import landfire
 from osgeo import gdal
 import logging
+
+
 logging.basicConfig(format='%(levelname)s: %(message)s')
 logger = logging.getLogger('lcp_logger')
 
@@ -73,3 +75,20 @@ def main():
 
 if __name__== "__main__":
     main()
+
+### Some trials
+
+file = "./results/Hays-Travis_2022/j365f451e55d241a390edcf03458afed3.tif"
+ds = gdal.Open(os.path.abspath(file))
+driver = gdal.GetDriverByName("LCP")
+outdata = driver.CreateCopy(os.path.abspath("./results/test.lcp"), ds, 1)
+outdata = driver.CreateCopy(os.path.abspath("./results/test.lcp"), ds, options=["ELEVATION_UNIT=METERS",
+                          "SLOPE_UNIT=DEGREES",
+                          "ASPECT_UNIT=AZIMUTH_DEGREES",
+                          "FUEL_MODEL_OPTION=NO_CUSTOM_AND_NO_FILE",
+                          "CANOPY_COV_UNIT=PERCENT",
+                          "CANOPY_HT_UNIT=METERS_X_10",
+                          "CBH_UNIT=METERS_X_10",
+                          "CBD_UNIT=KG_PER_CUBIC_METER_X_100",
+                          "DUFF_UNIT=MG_PER_HECTARE_X_10"])
+
