@@ -5,7 +5,7 @@
 # needed packages
 
 library(sf)
-library(raster)
+library(terra)
 #library(ts) # What is this? Not used.
 library(dplyr)
 #library(tidyr)
@@ -14,44 +14,55 @@ library(geosphere)
 #setwd("~/Downloads")
 ## DWS: Don't use setwd() in code!
 
-
-
-
+## Creates a square bounding box centered at point p (long, lat) with sides of
+## length `size` in meters. Returns matrix with columns: xmin ymin xmax ymax.
+bbox_centered_at <- function(p, size=1500) {
+  xmin <- destPoint(p, 270, size)[,1]
+  ymin <- destPoint(p, 180, size)[,2]
+  xmax <- destPoint(p, 90, size)[,1]
+  ymax <- destPoint(p, 0, size)[,2]
+  return(cbind(xmin, ymin, xmax, ymax))
+}
 
 ## Data below provided by the EcoLab program through Brown and Gresham
 p2022 <- st_read("./data/2022Properties.kml")
 p2021 <- st_read("./data/2021Properties.kml")
 sites <- rbind(p2022, p2021)
-
-# Clean out NA stuff that was in kml for some reason:
+# Clean out extra all NA columns was in kml (probably an artifact of kml
+# creation).
 sites <- dplyr::select(sites, Name, geometry)
-## DWS but these layers are MULTIPOLYGONS But that is weird, each site should
-## be just one polygon.
+## These layers are coded in the kml as MULTIPOLYGONS, but there is, in fact,
+## only one polygon per name so we should cast:
 sites <- st_cast(sites, "POLYGON")
 
+## Visual check: just show the polygon for one site
+# ggplot(dplyr::filter(sites, Name=="Bandera 2022-35")) + geom_sf()
+# ggplot(dplyr::filter(sites, Name=="Edwards 2022-25")) + geom_sf()
 
-# Just show the polygon for one site
-ggplot(dplyr::filter(sites, Name=="Bandera 2022-35")) + geom_sf()
-ggplot(dplyr::filter(sites, Name=="Edwards 2022-25")) + geom_sf()
 
-# Get centroids
+# Get centroids for each property:
 sites <- sites %>% mutate(centroid = st_centroid(geometry))
 
-# in own matrix
+# Extract centroid coordinates as matrix for use with geosphere::destPoint(()
 centroids <- st_coordinates(sites$centroid)
+bbox_centered_at(centroids)
 
-destPoint(centroids, 0, 1500)
-destPoint(centroids, 0, -1500)
-destPoint(centroids, 90, 1500)
-destPoint(centroids, 90, -1500)
 
+
+## Read lcp data
+hays_travis <- rast("results/Hays-Travis_2022/j365f451e55d241a390edcf03458afed3.tif")
+
+terra::writeRaster(hays_travis, "results/attempt.lcp", filetype = "LCP", overwrite = TRUE)
+
+
+## Alex's code:
 
 # Finds min and max boundaries of each site
 
 siteboundaries <- function(site) {
   sites <- t(sapply(1:length(site), function(i) as.vector(extent(site[i,]))))
   sites <- sites[rowSums(is.na(sites)) == 0, ] 
-  names <- as.data.frame(site$Name)
+  names <- as.data.frame(site$Name) # ? why as.data.frame?
   sites <- data.frame(names, sites)
   colnames(sites) <- c('propertyID', 'xmin', 'xmax', 'ymin', 'ymax')
   return(sites)

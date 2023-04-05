@@ -11,3 +11,9 @@ Alex Bowers' MS project
 ## Project Goals ##
 
 TODO
+
+
+## Resources ##
+
+- landfire data site: https://landfire.gov/getdata.php and pdf on web API: https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer
+- python code for landfire data retrieval: https://landfire-python.firesci.io/en/latest/
