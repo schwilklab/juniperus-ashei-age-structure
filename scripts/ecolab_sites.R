@@ -55,23 +55,6 @@ ggplot(dplyr::filter(sites, Name=="Hays/Travis 2022-02")) +
   geom_raster(data=rdf, aes(x=x,y=y,fill=US_ELEV2020)) +  geom_sf(linewidth=1, fill=NA)
 
 
-## test converting GeoTIFF to LCP:
-terra::writeRaster(hays_travis, "attempt.lcp", filetype = "LCP", datatype="INT2S",
-                   memfrac=0.7,
-                   gdal=c("ELEVATION_UNIT=METERS",
-                          "SLOPE_UNIT=DEGREES",
-                          "ASPECT_UNIT=AZIMUTH_DEGREES",
-                          "FUEL_MODEL_OPTION=NO_CUSTOM",
-                          "CANOPY_COV_UNIT=PERCENT",
-                          "CANOPY_HT_UNIT=METERS_X_10",
-                          "CBH_UNIT=METERS_X_10",
-                          "CBD_UNIT=KG_PER_CUBIC_METER_X_100",
-                          "DUFF_UNIT=MG_PER_HECTARE_X_10"),
-                   progress = 1,
-                          )
-
-
-
 ## Alex's code:
 
 # Finds min and max boundaries of each site
