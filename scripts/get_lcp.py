@@ -1,18 +1,24 @@
+#!/usr/bin/python3
 # get_lcp.py
+
+__version__ =    '''0.1'''
+__program__ =    '''get_lcppy'''
+__author__  =    '''Dylan Schwilk'''
+__usage__   =    '''get_lcp.py [options] -b bounding_box output_file'''
 
 import os
 import landfire # https://github.com/FireSci/landfire-python
 from osgeo import gdal
-import logging
 import sys
 import numpy as np
 import rasterio as rio
 
+import logging
 logging.basicConfig(format='%(levelname)s: %(message)s')
 logger = logging.getLogger('lcp_logger')
 
 
-def get_lcp_data(sbbox, name):
+def get_lcp_data(sbbox, name, opath):
     """sbbox is string such as "-98.11047 30.28860  -98.07929 30.31566"
     name is used to create filename. Returns an 8 band geotiff."""
     lf = landfire.Landfire(bbox=sbbox)
@@ -24,7 +30,7 @@ def get_lcp_data(sbbox, name):
                         "220CH_22",   # canopy height
                         "220CBH_22",  # canopy base height
                         "220CBD_22"], # canopy bulk density
-                    output_path="./results/" + name + ".zip")
+                    output_path = opath + name + ".zip")
     return()
 
 # def fix_aspect_band1(geot_file):
@@ -96,34 +102,38 @@ def run_example():
     
 def main():
     
-    '''Command line program.  '''
+    '''Command line program.  Usage: '''
     import sys   
     from optparse import OptionParser
 
     # make sure stdin and stdout is in unicode
     #sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
-    sys.stdout.reconfigure(encoding='utf-8')
+    #sys.stdout.reconfigure(encoding='utf-8')
     
     parser = OptionParser(usage=__usage__, version ="%prog " + __version__)
+    parser.add_option("-p", "--path", action="store", type="string",
+                      dest="opath",
+                      default="./results", help="Output path")
     parser.add_option("-b", "--bbox", action="store", type="string",
-                      dest="bbox",  default = "",
-                      help="Bounding box string")
-    parser.add_option("-n", "--name", action="store", type="string",
-                      dest="fname",
-                      default="", help="name")
-     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      dest="bbox",
+                      default="", help="Output path")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                        help="Print INFO messages to stdout, default=%default")    
 
     (options, args) = parser.parse_args()
 
+    if (options.bbox=="" or len(args) < 1):
+        print("Must supply bounding box and file name")
+        exit(-1)
+        
     if options.verbose:
         logger.setLevel(logging.INFO)
 
-    get_lcp(options.bbox, options.fname)
+    logger.debug("bounding box: " + options.bbox + ", " + "output file: " + args[0])
+    get_lcp_data(options.bbox, args[0], options.opath)
 
     return(0)
 
-# if __name__== "__main__":
-#     main()
-
+if __name__== "__main__":
+    main()
 
