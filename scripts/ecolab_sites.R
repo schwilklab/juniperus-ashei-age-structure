@@ -7,9 +7,19 @@ library(dplyr)
 library(geosphere)
 library(ggplot2)
 
+
+# landscape size for fire modeling. Should have at least 4980 m buffer on each
+# edge according to recommendations such as
+# https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-landscapes/lcpbuffering.htm?tocpath=Using%20Landscapes%7C_____6
+LANDSCAPE_SIZE <- 10960
+
+# This means we make all of our landscapes squares that are 4980+4980+1000
+# since we have no properties with extends over 1 km, right?
+
+
 ## Creates a square bounding box centered at point p (long, lat) with sides of
 ## length `size` in meters. Returns matrix with columns: xmin ymin xmax ymax.
-bbox_centered_at <- function(p, size=1500) {
+bbox_centered_at <- function(p, size=LANDSCAPE_SIZE) {
   xmin <- destPoint(p, 270, size)[,1]
   ymin <- destPoint(p, 180, size)[,2]
   xmax <- destPoint(p, 90, size)[,1]
