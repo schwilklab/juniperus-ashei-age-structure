@@ -1,13 +1,11 @@
 library(dplyr)
 library(tidyr)
 library(stringr)
-library(maptools)
 library(rgdal)
 library(sp)
 library(raster)
 library(sf)
 
-install.packages("janitor")
 samples <- read.csv("EcoLabSampling1.csv")
 
 ## makes kml file from csv
