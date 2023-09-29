@@ -73,7 +73,8 @@ def geotiff2lcp(infile, outfile):
     """Use gdal to convert an 8-band geotiff to a farsite4 style lcp for use with
 the fire spread model. Note that aspect layers such as ASP2020 from landfire
 will have -1 values where the slope is flat. fix_aspect_band will convert those
-to zeros which I think is fine. Not converting causes the gdal LCP dirver to crash, see 
+to zeros which I think is fine. Not converting causes the gdal LCP driver to
+crash, see https://github.com/OSGeo/gdal/issues/7561
 
     """
     ds = gdal.Open(os.path.abspath(infile))
