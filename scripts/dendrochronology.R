@@ -5,19 +5,24 @@
 
 # needed packages
 library(dplR)
-library(tidyverse)
-library(signal)
+# library(tidyverse) # DWS: NO. 
+#library(signal)
 
 
 
 ## ring width summaries
 
 # coverts raw file into readable rind width length
-ringwidths <- read.rwl("ringwidths.raw")
+ringwidths <- read.rwl("./data/ringwidths.raw")
 
-## how old inividuals are
+## how old individuals are
 rw_sum <- summary(ringwidths)
-ages <- select(rw_sum, c("series", "year"))
+##Error in ts(x) : 'ts' object must have one or more observations
+
+
+## DWS: script fails here. 
+
+ages <- dplyr::select(rw_sum, c("series", "year"))
 colnames(ages)[1] <- "id"
 
 # plots ring widths

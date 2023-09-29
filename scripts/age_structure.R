@@ -5,9 +5,11 @@ library(ggplot2)
 
 ## should use left join to keep all data
 tree_ages <- merge(trees, ages, by = "id")
+## DWS: Where are these objects from?
+
 
 # transect starts csv
-transect <- read.csv("transect_starts.csv")
+transect <- read.csv("./data/transect_starts.csv")
 
 
 # merge tree data with transect starts 
@@ -22,12 +24,17 @@ tree_ages <- merge(tree_ages, transect,
                    by.x = c("property_id", "transect"), 
                    by.y = c("property_id", "transect"))
 
+## DWS: Why is this repeated code now showing up three times?!
+
 # rename columns 
 colnames(tree_ages)[5] <- "sample_lat"
 colnames(tree_ages)[6] <- "sample_long"
 colnames(tree_ages)[12] <- "age"
 colnames(tree_ages)[13] <- "transect_lat"
 colnames(tree_ages)[14] <- "transect_long"
+
+## DWS: Poor practice.
+
 
 # distance from transect start
 samplingpoint <- data.frame(long=tree_ages$sample_long, lat=tree_ages$sample_lat)

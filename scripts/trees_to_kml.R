@@ -7,4 +7,4 @@ library(sf)
 head(trees)
 
 trees_sf <- st_as_sf(trees, coords = c("long", "lat"), crs = 4326)            
-st_write(trees_sf, "trees2.kml")
+st_write(trees_sf, "./results/trees2.kml")
