@@ -5,15 +5,11 @@
 
 # needed packages
 library(dplR)
-library(tidyverse)
-library(signal)
-
-
 
 ## ring width summaries
 
 # coverts raw file into readable rind width length
-ringwidths <- read.rwl("ringwidths.raw")
+ringwidths <- read.rwl("data/ringwidths.raw")
 
 ## how old inividuals are
 rw_sum <- summary(ringwidths)
@@ -40,7 +36,6 @@ rowMeans(ringwidths_rwi, na.rm=TRUE)
 # mean-value chronology
 ringwidths_crn <- chron(ringwidths_rwi)
 plot(ringwidths_crn, add.spline=TRUE, nyrs=20)
-
 
 
 

@@ -1,8 +1,8 @@
-"property_id","area_ac","area_ha","nearest_town","elev_low","elev_high","long","lat"
-"Bandera_2022-35",101.69,41.15,"Medina",1760,2080,-99.317,29.895
-"Burnet_2022-16",46.733,18.91,"Burnet",1040,1080,-98.389,30.78
-"Edwards_2022-25",77.839,31.5,"Barksdale",2040,2160,-100.326,29.705
-"Hays-Travis_2022-02",64.9728,26.29,"Dripping Springs",1200,1400,-98.09,30.301
-"Kerr_2021-36",477.55,193.26,"Hunt",1820,2080,-99.412,30.061
-"Medina_2022-04",41.51,16.8,"Mico",1040,1160,-98.938,29.547
-"Uvalde_2021-03",50.35,20.38,"Concan",1200,1420,-99.626,29.447
+property_id,property_code,area_ac,area_ha,nearest_town,elev_low,elev_high,long,lat
+Bandera_2022-35,BA,101.69,41.15,Medina,1760,2080,-99.317,29.895
+Burnet_2022-16,BU,46.733,18.91,Burnet,1040,1080,-98.389,30.78
+Edwards_2022-25,ED,77.839,31.5,Barksdale,2040,2160,-100.326,29.705
+Hays-Travis_2022-02,HT,64.9728,26.29,Dripping Springs,1200,1400,-98.09,30.301
+Kerr_2021-36,KE,477.55,193.26,Hunt,1820,2080,-99.412,30.061
+Medina_2022-04,ME,41.51,16.8,Mico,1040,1160,-98.938,29.547
+Uvalde_2021-03,UV,50.35,20.38,Concan,1200,1420,-99.626,29.447
