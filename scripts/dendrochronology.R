@@ -5,6 +5,7 @@
 
 # needed packages
 library(dplR)
+library(dplyr)
 
 ## ring width summaries
 

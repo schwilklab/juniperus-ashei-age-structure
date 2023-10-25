@@ -6,9 +6,6 @@
 trees <- read.csv("data/trees.csv", na.strings = "NA") 
 properties <- read.csv("data/properties.csv")
 transect_starts <- read.csv("data/transect_starts.csv")
-  
-# selects needed data
-properties <- properties[1:2]
 
 # merges trees and properties data by property_id
 trees <- merge(trees, properties, by = "property_id")

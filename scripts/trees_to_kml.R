@@ -6,5 +6,5 @@ library(sf)
 
 head(trees)
 
-trees_sf <- st_as_sf(trees, coords = c("long", "lat"), crs = 4326)            
+trees_sf <- st_as_sf(tree_ages, coords = c("long", "lat"), crs = 4326)            
 st_write(trees_sf, "trees.kml")
