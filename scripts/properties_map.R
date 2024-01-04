@@ -1,4 +1,8 @@
-# map of sites
+## properties_map.R
+## Alex Bowers
+
+### creates map to display property locations across texas
+
 library(maps)
 library(tmap)
 
