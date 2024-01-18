@@ -7,13 +7,15 @@
 library(dplR)
 library(dplyr)
 library(ggplot2)
-
+library(tidyr)
+library(lme4)
 
 # coverts raw file into readable rind width length
 ringwidths_slabs <- read.rwl("data/ringcounts_slabs.raw")
 ringwidths_cores <- read.rwl("data/ringcounts_cores.raw")
 
 # blank objects stops code from running, so blank objects are removed
+# data will be edited later
 ringwidths_slabs$KEB07 
 ringwidths_slabs$UVA02
 ringwidths_slabs <- select(ringwidths_slabs, -KEB07)
@@ -21,46 +23,77 @@ ringwidths_slabs <- select(ringwidths_slabs, -UVA02)
 ringwidths_slabs <- select(ringwidths_slabs, -UVA04)
 
 
-## adds how old inividuals are to trees data
+## creates data frame of inital ring counts
 rw_sum <- summary(ringwidths_slabs)
-ages <- select(rw_sum, c("series", "year"))
-colnames(ages)[1] <- "id"
+age <- select(rw_sum, c("series", "year"))
+colnames(age)[1] <- "id"
 
-### option 1 for chronology
+# for use in dplR package
+rwi_slabs <- ringwidths_slabs
+
+## cleans data
+# widens slabs
+ringwidths_slabs$year <- as.numeric(rownames(ringwidths_slabs))
+ringwidths_slabs <- pivot_longer(ringwidths_slabs, cols = -year,  
+                                 names_to = "id", values_to = "ring_width")
+#### note needs to be fixed below
+#widens cores
+ringwidths_cores$year <- as.numeric(rownames(ringwidths_cores))
+ringwidths_cores <- pivot_longer(ringwidths_cores, cols = -year,  
+                                 names_to = "id", values_to = "ring_width")
+# seperates id from core id
+ringwidths_cores$core <- sub(".....", "", ringwidths_cores$id)
+ringwidths_cores$id <- sub("*([A-Z])$", "", ringwidths_cores$id)
+# adds core id as a column 
+ringwidths_cores <- na.omit(ringwidths_cores)
+pivot_wider(ringwidths_cores, names_from = core, values_from = ring_width)
+### note: I have no idea why this wont work :(
+
+## combines data with trees data drame from "trees_read_clean.R"
+trees_rw <- merge(ringwidths_slabs, trees, by = "id")
+
+# note: wont work until data is wider.
+# produces 17 million rows?
+trees_rw <- left_join(ringwidths_cores, trees_rw , by = "id")
+
+
+### plots for data visualization
+
+# separated by site to find trends
+test <- trees_rw[trees_rw$transect_id == "UVA",]
+
+ggplot(test, aes(year, ring_width)) + geom_line() + 
+  facet_wrap(~id, ncol = 1, switch = "y")
+
+
+
+
+
+ ### detredning using dplR
 ## detrends
 
 # detrends using a conservative approach based on 
 # Fritts HC (2001) Tree Rings and Climate. The Blackburn Press.
-detrended_slabs <- detrend(rwl = ringwidths_slabs, method = "ModNegExp")
+detrended_slabs <- detrend(rwl = rwi_slabs, method = "ModNegExp")
 
 # Builds a Mean-Value Chronology
 # uses uses Tukey’s biweight robust mean
 chronology_slabs <- chron(detrended_slabs)
 
-# selcts only values with at least 5 samples
-chronology_slabs <- subset(chronology_slabs, samp.depth > 4)
-
-
-# reruns detrending and creates chronology with values with at least 5 samples
-chronchronology_slabs <- chron(
-  detrend(ringwidths_slabs[chronology_slabs$samp.depth > 4,], 
-          method="ModNegExp"))
-
 # plots chronology
 plot(chronology_slabs, add.spline=TRUE, nyrs=30)
 
-## note: not sure where to go from here
 
 
 ## individual series correlation
 # seperates by site
-ba <- ringwidths_slabs[grep("^BA", names(ringwidths_slabs))]
-bu <- ringwidths_slabs[grep("^BU", names(ringwidths_slabs))]
-ed <- ringwidths_slabs[grep("^ED", names(ringwidths_slabs))]
-ht <- ringwidths_slabs[grep("^HT", names(ringwidths_slabs))]
-ke <- ringwidths_slabs[grep("^KE", names(ringwidths_slabs))]
-me <- ringwidths_slabs[grep("^ME", names(ringwidths_slabs))]
-uv <- ringwidths_slabs[grep("^UV", names(ringwidths_slabs))]
+ba <- ringwidths_slabs[grep("^BA", names(rwi_slabs))]
+bu <- ringwidths_slabs[grep("^BU", names(rwi_slabs))]
+ed <- ringwidths_slabs[grep("^ED", names(rwi_slabs))]
+ht <- ringwidths_slabs[grep("^HT", names(rwi_slabs))]
+ke <- ringwidths_slabs[grep("^KE", names(rwi_slabs))]
+me <- ringwidths_slabs[grep("^ME", names(rwi_slabs))]
+uv <- ringwidths_slabs[grep("^UV", names(rwi_slabs))]
 
 # Blue correlates well 
 # (p-values less or equal to the user-set critical value) 
@@ -70,51 +103,14 @@ uv <- ringwidths_slabs[grep("^UV", names(ringwidths_slabs))]
 # no correlations calculated. 
 rwl <- corr.rwl.seg(uv, seg.length=10, pcrit=0.05)
 
-# correlation for individual series
+
+
+# correlation for individual series to whole
 cor_KEC01 <- corr.series.seg(rwl=ke, series="KEC01",
                           seg.length=10)
 
-## note: unsure how to interpret 
-## lower corelation means need to adjust values?
-## https://opendendro.github.io/dplR-workshop/xdate.html
 
 
-### option 2 for master chronology
-# removing series based on the subsample signal strength
-
-rwc_ids <- autoread.ids(ringwidths_slabs)
-sssThresh <- 0.85
-rwc_SSS <- sss(detrended_slabs, rwc_ids)
-yrs <- time(ringwidths_slabs)
-yrCutoff <- max(yrs[rwc_SSS < sssThresh])
-
-ggplot() +
-  geom_rect(aes(ymin=-Inf, ymax=Inf,xmin=-Inf,xmax=yrCutoff),
-            fill="darkred",alpha=0.5) +
-  annotate(geom = "text",y=1.5,x=1725,label="SSS < 0.85")+
-  geom_hline(yintercept = 1,linetype="dashed") +
-  geom_line(aes(x = yrs, y = chronchronology_slabs$std)) +
-  labs(x = "Year", y = "RWI") + theme_minimal()
-## note: cuts out most of the data
-
-
-# cuts out insignificant data
-rwc_SSS_sig <- ringwidths_slabs[rwc_SSS > sssThresh]
-rwc_SSS_det <- detrend(rwl =rwc_SSS_sig, method="ModNegExp")
-
-
-# detrended master chronology excluding insignificant
-rwc_SSS_chron <- chron(rwc_SSS_det)
-ggplot() +
-  geom_hline(yintercept = 1,linetype="dashed") +
-  geom_line(aes(x=time(rwc_SSS_chron),y=rwc_SSS_chron$std)) +
-  geom_line(aes(x=time(rwc_SSS_chron),
-                y=caps(rwc_SSS_chron$std,nyrs = 30)),
-            color="darkred") +
-  labs(x="Year",y="RWI") + theme_minimal()
-
-
-#### note: after master chronology need to correct for erroes
 
 # each series is assessed to see if its inclusion in the chronology improves
 # the EPS (Expressed Population Signal)
@@ -166,15 +162,18 @@ glk_slabs$glk_mat
 
 
 
-### Next steps - from Nathan in November 
 
-# try to get around 30 with <2 missing rings into a master chronology 
-# find narrowest rings that could be missing in others 
+### crossdating using lmer
+head(trees_rw)
 
-### Next steps - winter break research
-# 1: use uses EPS-based chronology stripping 
-# 2: recount and check problem areas with "corr.series.seg" to check for 
-# problem areas 
-# 3: redo step 1 until no series can be removed
-# 3: Use  Gleichläufgkeit function and Spearman's rho correlations to check
-# chronology significance
+trees_lmer <- trees_rw[!(is.na(trees_rw$ring_width)),]
+trees_lmer <- lmer(ring_width ~ exp(-year) + (1|property_id) + (1|id),
+                   data = trees_lmer)
+plot(trees_lmer)
+
+trees_lmer <- trees_rw[!(is.na(trees_rw$ring_width)),]
+trees_lmer <- lmer(ring_width ~ year + dbh + (1|property_id) +(1|id),
+                   data = trees_lmer)
+plot(trees_lmer)
+
+

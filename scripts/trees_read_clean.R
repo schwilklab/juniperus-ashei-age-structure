@@ -21,3 +21,4 @@ trees$individual <- stringr::str_pad(trees$individual, 2, pad = "0")
 trees$id <- paste(trees$property_code, trees$transect, 
                   trees$individual, sep="")
 trees$transect_id <- paste(trees$property_code, trees$transect, sep="")
+
