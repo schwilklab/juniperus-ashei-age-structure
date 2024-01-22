@@ -8,7 +8,7 @@ library(ggplot2)
 library(elevatr) 
 
 # merge field data with ring counts
-trees <- dplyr::left_join(trees, ages, by = "id")
+trees <- dplyr::left_join(trees, age, by = "id")
 
 ## distance from transect start
 
@@ -31,7 +31,7 @@ get_cords <- function(long, lat, id) {
   return(elev[[3]])
 }
 
-# finds different in elevation between transect start and sampling poin 
+# finds different in elevation between transect start and sampling point
 trees$sample_elev <- get_cords(trees$long.x, trees$lat.x, trees$id)
 trees$transect_elev <- get_cords(trees$transect_long, trees$transect_lat, trees$id)
 trees$elev_dif <- trees$sample_elev - trees$transect_elev
@@ -55,7 +55,7 @@ theme <- theme_bw() +
 
 ## disance plots 
 
-# all plots age structure 
+# age vs distance
 ggplot(trees, aes(distance, year, color=transect_id)) + 
   geom_point() +
   facet_wrap(~transect_id) +
@@ -75,7 +75,7 @@ ggplot(trees, aes(distance, dbh, color=transect_id)) +
     color = "Transect"
   )
 
-# plot all sites together age vs distance
+# age vs distance
 ggplot(trees, aes(distance, year, color=property_id)) + 
   geom_point(size=4) + 
   labs(
@@ -84,7 +84,7 @@ ggplot(trees, aes(distance, year, color=property_id)) +
     color = "Property"
   ) + theme
 
- # all sites together age vs distance
+ # dbh vs distance
 ggplot(trees, aes(distance, dbh, color=property_id)) + 
   geom_point(size=4) + 
   labs(
@@ -93,9 +93,7 @@ ggplot(trees, aes(distance, dbh, color=property_id)) +
     color = "Property"
   ) + theme
 
-## elevation plots
-
-# all together 
+# age vs elevation
 ggplot(trees, aes(elev_dif, year, color=property_id)) + 
   geom_point(size=4) + 
   labs(
@@ -105,7 +103,7 @@ ggplot(trees, aes(elev_dif, year, color=property_id)) +
   ) + theme +
   theme(legend.position = c(0.85, 0.75))
 
-# seperated by site
+# age vs elevatio
 ggplot(trees, aes(elev_dif, year, color=transect_id)) + 
   geom_point() +
   facet_wrap(~transect_id) +
@@ -114,3 +112,44 @@ ggplot(trees, aes(elev_dif, year, color=transect_id)) +
     y = "Ring Count",
     color = "Transect"
   )
+
+
+
+
+
+###  linear mixed effect model 
+# distance
+dist_model <- lmer(year ~ elev_dif + (1 |transect_id) +(1 |dbh), data = trees)
+
+dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
+# P = 0.8167, not significant
+
+dist_model_anova_coeff = summary(dist_model)$coefficients
+dist_model_anova_coeff[1]
+
+###plots
+# Linear Mixed effect mdel
+ggplot(trees, aes(elev_dif, year, color=property_id)) + 
+  geom_point(size=4) + 
+  labs(
+    x = "Distance from start of transect (m)",
+    y = "Ring count",
+    color = "Property"
+  ) +
+  # Estiamte
+  geom_abline(intercept = dist_model_anova_coeff[1], 
+              slope = dist_model_anova_coeff[2],
+              size = 1.5,
+              color = "black") +
+  # standard error
+  geom_abline(intercept = (dist_model_anova_coeff[1] + 
+                             dist_model_anova_coeff[1,2]), 
+              slope = dist_model_anova_coeff[2],
+              size = 1.5,
+              color = "red") +
+  geom_abline(intercept = (dist_model_anova_coeff[1] - 
+                             dist_model_anova_coeff[1,2]), 
+              slope = dist_model_anova_coeff[2],
+              size = 1.5,
+              color = "red")
+

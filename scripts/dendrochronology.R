@@ -62,12 +62,12 @@ trees_rw <- merge(ringwidths_cores, trees_rw, by.x = "id", by.y = "id")
 ### plots for data visualization
 
 # separated by site to find trends
-test <- trees_rw[trees_rw$transect_id == "KEC",]
+test <- trees_rw[trees_rw$transect_id == "UVA",]
 
 ggplot(test, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y")
 
-# plot all ring couts for slabs
+ # plot all ring couts for slabs
 test2 <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
 test2 <- test2[grep("UVA02", test2$id),]
 ggplot(test2, aes(year, ring_width)) + geom_line() + 
@@ -107,7 +107,7 @@ uv <- ringwidths_slabs[grep("^UV", names(rwi_slabs))]
 # (p-values greater than the user-set critical value). 
 # Green lines show segments that do not completely overlap the time period
 # no correlations calculated. 
-rwl <- corr.rwl.seg(uv, seg.length=10, pcrit=0.05)
+rwl <- corr.rwl.seg(ba, seg.length=10, pcrit=0.05)
 
 
 
