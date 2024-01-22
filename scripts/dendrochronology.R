@@ -36,40 +36,46 @@ rwi_slabs <- ringwidths_slabs
 ringwidths_slabs$year <- as.numeric(rownames(ringwidths_slabs))
 ringwidths_slabs <- pivot_longer(ringwidths_slabs, cols = -year,  
                                  names_to = "id", values_to = "ring_width")
+
+
 #### note needs to be fixed below
 #widens cores
 ringwidths_cores$year <- as.numeric(rownames(ringwidths_cores))
 ringwidths_cores <- pivot_longer(ringwidths_cores, cols = -year,  
                                  names_to = "id", values_to = "ring_width")
-# seperates id from core id
-ringwidths_cores$core <- sub(".....", "", ringwidths_cores$id)
-ringwidths_cores$id <- sub("*([A-Z])$", "", ringwidths_cores$id)
-# adds core id as a column 
+# separates id from core id
 ringwidths_cores <- na.omit(ringwidths_cores)
 pivot_wider(ringwidths_cores, names_from = core, values_from = ring_width)
+# adds core id as a column 
+ringwidths_cores <- na.omit(ringwidths_cores)
 ### note: I have no idea why this wont work :(
 
+
 ## combines data with trees data drame from "trees_read_clean.R"
-trees_rw <- merge(ringwidths_slabs, trees, by = "id")
+trees_rw <- merge(ringwidths_slabs, trees, by.x = "id", by.y = "id")
 
 # note: wont work until data is wider.
 # produces 17 million rows?
-trees_rw <- left_join(ringwidths_cores, trees_rw , by = "id")
+trees_rw <- merge(ringwidths_cores, trees_rw, by.x = "id", by.y = "id")
 
 
 ### plots for data visualization
 
 # separated by site to find trends
-test <- trees_rw[trees_rw$transect_id == "UVA",]
+test <- trees_rw[trees_rw$transect_id == "KEC",]
 
 ggplot(test, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y")
 
+# plot all ring couts for slabs
+test2 <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
+test2 <- test2[grep("UVA02", test2$id),]
+ggplot(test2, aes(year, ring_width)) + geom_line() + 
+  facet_wrap(~id, ncol = 1, switch = "y")
 
 
 
-
- ### detredning using dplR
+### detredning using dplR
 ## detrends
 
 # detrends using a conservative approach based on 
