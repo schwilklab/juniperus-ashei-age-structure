@@ -6,6 +6,7 @@
 library(geosphere)
 library(ggplot2)
 library(elevatr) 
+library(car)
 
 # merge field data with ring counts
 trees <- dplyr::left_join(trees, age, by = "id")
@@ -132,7 +133,7 @@ dist_model_anova_coeff[1]
 ggplot(trees, aes(elev_dif, year, color=property_id)) + 
   geom_point(size=4) + 
   labs(
-    x = "Distance from start of transect (m)",
+    x = "Elevation from start of transect (m)",
     y = "Ring count",
     color = "Property"
   ) +

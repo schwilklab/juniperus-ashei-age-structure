@@ -31,6 +31,9 @@ colnames(age)[1] <- "id"
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
 
+
+
+
 ## cleans data
 # widens slabs
 ringwidths_slabs$year <- as.numeric(rownames(ringwidths_slabs))
@@ -63,16 +66,54 @@ trees_rw <- merge(ringwidths_cores, trees_rw, by.x = "id", by.y = "id")
 
 # separated by site to find trends
 test <- trees_rw[trees_rw$transect_id == "UVA",]
-
 ggplot(test, aes(year, ring_width)) + geom_line() + 
-  facet_wrap(~id, ncol = 1, switch = "y")
-
- # plot all ring couts for slabs
+  facet_wrap(~id, ncol = 1, switch = "y") +
+  scale_x_continuous(breaks = seq(min(test$year), 
+                                  max(test$year), by = 5))
+  
+ # plot all ring counts for slabs
 test2 <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
-test2 <- test2[grep("UVA02", test2$id),]
+test2 <- test2[grep("KEC", test2$id),]
 ggplot(test2, aes(year, ring_width)) + geom_line() + 
-  facet_wrap(~id, ncol = 1, switch = "y")
+  facet_wrap(~id, ncol = 1, switch = "y") +
+  scale_x_continuous(breaks = seq(min(test2$year), 
+                                  max(test2$year), by = 3))
 
+## drought check
+rainfall <- read.csv("data/USGS_kerrville_rainfall.csv")
+rainfall_low <- mean(rainfall$TOTAL) - (sd(rainfall$TOTAL)*1.5)
+droughts <- rainfall[rainfall$TOTAL < rainfall_low,]
+droughts$YEAR
+
+# 2022, 2011, 2008
+# very rainy in 2015, 2007, 2004, 2002, 1992
+test3 <- trees_rw[trees_rw$year > 1970,]
+test3 <- test3[test3$transect_id == "UVB",]
+ggplot(test3, aes(year, ring_width)) + geom_line() + 
+  facet_wrap(~id, ncol = 1, switch = "y") +
+  scale_x_continuous(breaks = seq(min(test$year), 
+                                  max(test$year), by = 1))
+
+## outlier test
+# finds sd and mean
+rw_sd <- sd(trees_rw$ring_width, na.rm = TRUE)
+rw_mean <- mean(trees_rw$ring_width, na.rm = TRUE)
+
+# finds rings greater than 2 times the sd
+outliers <- trees_rw[trees_rw$ring_width < rw_mean+(rw_sd*2),]
+outlier_rings <- trees_rw[!is.na(outliers$ring_width),]
+# high growth years 
+unique(outlier_rings$year)
+# note 2 sds from the mean is negative
+
+# finding the smallest rings
+
+# rings smaller than 0.05 mm
+smallest <- trees_rw[trees_rw$ring_width < .05,]
+smallest_rings <- trees_rw[!is.na(smallest$ring_width),]
+# years with smallest rings
+sort(unique(smallest_rings$year))
+# note: do not match up with drought years
 
 
 ### detredning using dplR
