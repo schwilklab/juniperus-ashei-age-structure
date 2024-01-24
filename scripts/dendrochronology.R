@@ -81,12 +81,12 @@ ggplot(test2, aes(year, ring_width)) + geom_line() +
 
 ## drought check
 rainfall <- read.csv("data/USGS_kerrville_rainfall.csv")
+
+# finds years less that 1.5 sd away from the mean
 rainfall_low <- mean(rainfall$TOTAL) - (sd(rainfall$TOTAL)*1.5)
 droughts <- rainfall[rainfall$TOTAL < rainfall_low,]
 droughts$YEAR
 
-# 2022, 2011, 2008
-# very rainy in 2015, 2007, 2004, 2002, 1992
 test3 <- trees_rw[trees_rw$year > 1970,]
 test3 <- test3[test3$transect_id == "UVB",]
 ggplot(test3, aes(year, ring_width)) + geom_line() + 
@@ -114,6 +114,7 @@ smallest_rings <- trees_rw[!is.na(smallest$ring_width),]
 # years with smallest rings
 sort(unique(smallest_rings$year))
 # note: do not match up with drought years
+droughts$YEAR
 
 
 ### detredning using dplR
