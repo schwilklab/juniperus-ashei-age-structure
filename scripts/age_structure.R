@@ -120,7 +120,7 @@ ggplot(trees, aes(elev_dif, year, color=transect_id)) +
 
 ###  linear mixed effect model 
 # distance
-dist_model <- lmer(year ~ elev_dif + (1 |transect_id) +(1 |dbh), data = trees)
+dist_model <- lmer(year ~ distance + (1 |transect_id) +(1 |dbh), data = trees)
 
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
 # P = 0.8167, not significant

@@ -24,9 +24,14 @@ ringwidths_slabs <- select(ringwidths_slabs, -UVA04)
 
 
 ## creates data frame of inital ring counts
-rw_sum <- summary(ringwidths_slabs)
-age <- select(rw_sum, c("series", "year"))
+rw_sum_slabs <- summary(ringwidths_slabs)
+rw_sum_cores <- summary(ringwidths_cores)
+age <- select(rw_sum_slabs, c("series", "year"))
 colnames(age)[1] <- "id"
+
+# checks for oldest 
+count(rw_sum_slabs[rw_sum_slabs$year >= 200,]) 
+count(rw_sum_cores[rw_sum_cores$year >= 200,])
 
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
@@ -79,14 +84,6 @@ ggplot(test2, aes(year, ring_width)) + geom_line() +
   scale_x_continuous(breaks = seq(min(test2$year), 
                                   max(test2$year), by = 3))
 
-## drought check
-rainfall <- read.csv("data/USGS_kerrville_rainfall.csv")
-
-# finds years less that 1.5 sd away from the mean
-rainfall_low <- mean(rainfall$TOTAL) - (sd(rainfall$TOTAL)*1.5)
-droughts <- rainfall[rainfall$TOTAL < rainfall_low,]
-droughts$YEAR
-
 test3 <- trees_rw[trees_rw$year > 1970,]
 test3 <- test3[test3$transect_id == "UVB",]
 ggplot(test3, aes(year, ring_width)) + geom_line() + 
@@ -94,27 +91,48 @@ ggplot(test3, aes(year, ring_width)) + geom_line() +
   scale_x_continuous(breaks = seq(min(test$year), 
                                   max(test$year), by = 1))
 
+
+
 ## outlier test
 # finds sd and mean
 rw_sd <- sd(trees_rw$ring_width, na.rm = TRUE)
 rw_mean <- mean(trees_rw$ring_width, na.rm = TRUE)
 
-# finds rings greater than 2 times the sd
-outliers <- trees_rw[trees_rw$ring_width < rw_mean+(rw_sd*2),]
+# finds big rings
+outliers <- trees_rw[trees_rw$ring_width > rw_mean+(rw_sd*5),]
 outlier_rings <- trees_rw[!is.na(outliers$ring_width),]
 # high growth years 
-unique(outlier_rings$year)
+big_rings <- sort(unique(outlier_rings$year))
 # note 2 sds from the mean is negative
 
-# finding the smallest rings
 
+# finding the smallest rings
 # rings smaller than 0.05 mm
-smallest <- trees_rw[trees_rw$ring_width < .05,]
+smallest <- trees_rw[trees_rw$ring_width < 0.01,]
 smallest_rings <- trees_rw[!is.na(smallest$ring_width),]
 # years with smallest rings
-sort(unique(smallest_rings$year))
-# note: do not match up with drought years
-droughts$YEAR
+small_rings <- sort(unique(smallest_rings$year))
+
+
+## drought check
+rainfall <- read.csv("data/USGS_kerrville_rainfall.csv")
+
+# finds years less that 1.5 sd away from the mean
+rainfall_low <- mean(rainfall$TOTAL) - (sd(rainfall$TOTAL)*1.5)
+droughts <- rainfall[rainfall$TOTAL < rainfall_low,]
+drought_years <- droughts$YEAR
+# finds rainy seasons
+rainfall_high <- mean(rainfall$TOTAL) + (sd(rainfall$TOTAL)*1.5)
+rainy <- rainfall[rainfall$TOTAL > rainfall_high,]
+rainy_years <- rainy$YEAR
+
+# do droughts and rainy seasons match up
+small_rings
+drought_years
+
+big_rings
+rainy_years
+# nope
 
 
 ### detredning using dplR
