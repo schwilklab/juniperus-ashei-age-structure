@@ -179,7 +179,7 @@ year_corr <- function(year){
   year_rw <- trees_rw[trees_rw$year == year,]
   summary(year_rw$ring_width)
 }
-year_corr(2022)
+year_corr(2008)
 
 # boxplots showing no trends
 trees_cor <- trees_rw[trees_rw$year > 2000,]
