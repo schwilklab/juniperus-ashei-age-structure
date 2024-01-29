@@ -25,9 +25,25 @@ ringwidths_slabs <- select(ringwidths_slabs, -UVA04)
 
 ## creates data frame of inital ring counts
 rw_sum_slabs <- summary(ringwidths_slabs)
+# selects needed variables
+rw_sum_slabs <- select(rw_sum_slabs, c("series", "year"))
+colnames(rw_sum_slabs)[1] <- "id"
+
+# cleans cores to match years 
 rw_sum_cores <- summary(ringwidths_cores)
-age <- select(rw_sum_slabs, c("series", "year"))
-colnames(age)[1] <- "id"
+# selects out individual ids
+rw_sum_cores$core_id <- str_match(rw_sum_cores$series, "[A-Za-z]$")
+rw_sum_cores$id <- str_match(rw_sum_cores$series, "^[A-Za-z]{3}[0-9]{2}")
+# finds oldest core for each individual 
+rw_sum_cores <- select(rw_sum_cores, c(id, year, core_id))
+rw_sum_cores <- rw_sum_cores %>% group_by(, id) %>% summarise(max(year))
+colnames(rw_sum_cores)[1] <- "id"
+colnames(rw_sum_cores)[2] <- "year"
+
+# makes an age data frame for use in age_structure
+age <- rbind(rw_sum_slabs, rw_sum_cores)
+
+
 
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
@@ -106,13 +122,13 @@ trees_rw <- trees_rw[!is.na(trees_rw$year),]
 
 ############# plots for data visualization ############# 
 # separated by site to find trends
-test <- trees_rw[trees_rw$transect_id == "UVA",]
+test <- trees_rw[trees_rw$transect_id == "KEA",]
 ggplot(test, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y")
   
  # plot all ring counts for slabs
 test2 <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
-test2 <- test2[grep("KEC", test2$id),]
+test2 <- test2[grep("UVA02", test2$id),]
 ggplot(test2, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y") +
   scale_x_continuous(breaks = seq(min(test2$year), 
@@ -191,6 +207,7 @@ ggplot(trees_cor, aes(factor(year), ring_width)) + geom_boxplot()
 
 
 
+
 ### detrending using dplR
 ## detrends
 
@@ -223,7 +240,7 @@ uv <- ringwidths_slabs[grep("^UV", names(rwi_slabs))]
 # (p-values greater than the user-set critical value). 
 # Green lines show segments that do not completely overlap the time period
 # no correlations calculated. 
-rwl <- corr.rwl.seg(ba, seg.length=10, pcrit=0.05)
+rwl <- corr.rwl.seg(rwi_slabs, seg.length=10, pcrit=0.05)
 
 
 
@@ -294,8 +311,10 @@ trees_lmer <- lmer(ring_width ~ exp(-year) + (1|property_id) + (1|id),
 plot(trees_lmer)
 
 trees_lmer <- trees_rw[!(is.na(trees_rw$ring_width)),]
-trees_lmer <- lmer(ring_width ~ year + dbh + (1|property_id) +(1|id),
+trees_lmer <- lmer(ring_width ~ year +(1|property_id) +(1|id),
                    data = trees_lmer)
+Anova(trees_lmer)
+summary(trees_lmer)
 plot(trees_lmer)
 
 
