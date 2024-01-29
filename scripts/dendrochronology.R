@@ -29,52 +29,86 @@ rw_sum_cores <- summary(ringwidths_cores)
 age <- select(rw_sum_slabs, c("series", "year"))
 colnames(age)[1] <- "id"
 
-# checks for oldest 
-count(rw_sum_slabs[rw_sum_slabs$year >= 200,]) 
-count(rw_sum_cores[rw_sum_cores$year >= 200,])
-
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
 
 
 
 
-## cleans data
+############# cleans data ############
 # widens slabs
 ringwidths_slabs$year <- as.numeric(rownames(ringwidths_slabs))
 ringwidths_slabs <- pivot_longer(ringwidths_slabs, cols = -year,  
                                  names_to = "id", values_to = "ring_width")
+ringwidths_slabs <- na.omit(ringwidths_slabs)
 
-
-#### note needs to be fixed below
 #widens cores
 ringwidths_cores$year <- as.numeric(rownames(ringwidths_cores))
 ringwidths_cores <- pivot_longer(ringwidths_cores, cols = -year,  
                                  names_to = "id", values_to = "ring_width")
 # separates id from core id
 ringwidths_cores <- na.omit(ringwidths_cores)
-pivot_wider(ringwidths_cores, names_from = core, values_from = ring_width)
-# adds core id as a column 
-ringwidths_cores <- na.omit(ringwidths_cores)
-### note: I have no idea why this wont work :(
+ringwidths_cores$core_id <- str_match(ringwidths_cores$id, "[A-Za-z]$")
+ringwidths_cores$id <- str_match(ringwidths_cores$id, "^[A-Za-z]{3}[0-9]{2}")
+# corrects column names
+ringwidths_cores$id <- ringwidths_cores$id[,1]
+ringwidths_cores$core_id <- ringwidths_cores$core_id[,1]
+# seperates by core ID to make a column in trees_rw for A, B, and NA cores
+ringwidths_cores_A <- ringwidths_cores[ringwidths_cores$core_id == "A",]
+colnames(ringwidths_cores_A)[3] <- "ring_width_A"
 
+ringwidths_cores_B <- ringwidths_cores[ringwidths_cores$core_id == "B",]
+colnames(ringwidths_cores_B)[3] <- "ring_width_B"
+
+ringwidths_cores_NA <- ringwidths_cores[is.na(ringwidths_cores$core_id),]
+colnames(ringwidths_cores_NA)[3] <- "ring_width_NA"
 
 ## combines data with trees data drame from "trees_read_clean.R"
-trees_rw <- merge(ringwidths_slabs, trees, by.x = "id", by.y = "id")
+trees_rw <- left_join(trees, ringwidths_slabs, by = "id")
+trees_rw <- left_join(trees_rw, ringwidths_cores_A, by = "id")
+trees_rw <- left_join(trees_rw, ringwidths_cores_B, by = "id", 
+                      relationship = "many-to-many")
+trees_rw <- left_join(trees_rw, ringwidths_cores_NA, by = "id", 
+                      relationship = "many-to-many")
 
-# note: wont work until data is wider.
-# produces 17 million rows?
-trees_rw <- merge(ringwidths_cores, trees_rw, by.x = "id", by.y = "id")
+# combines seperate series years into one column
+trees_rw$year <- ifelse(is.na(trees_rw$year.x), 
+                        trees_rw$year.y, trees_rw$year.x)
+trees_rw$year <- ifelse(is.na(trees_rw$year), 
+                        trees_rw$year.x.x, trees_rw$year)
+trees_rw$year <- ifelse(is.na(trees_rw$year), 
+                        trees_rw$year.y.y, trees_rw$year)
+
+# combines seperate series ring widths into one column
+trees_rw$ring_width <- ifelse(is.na(trees_rw$ring_width), 
+                        trees_rw$ring_width_A, trees_rw$ring_width)
+trees_rw$ring_width <- ifelse(is.na(trees_rw$ring_width), 
+                        trees_rw$ring_width_B, trees_rw$ring_width)
+trees_rw$ring_width <- ifelse(is.na(trees_rw$ring_width), 
+                              trees_rw$ring_width_NA, trees_rw$ring_width)
+
+# combines seperate series core_ids into one column
+trees_rw$core_id <- ifelse(is.na(trees_rw$core_id), 
+                              trees_rw$core_id.x, trees_rw$core_id)
+trees_rw$core_id <- ifelse(is.na(trees_rw$core_id), 
+                           trees_rw$core_id.y, trees_rw$core_id)
+# removes extra columns 
+colnames(trees_rw)
+trees_rw <- select(trees_rw, -nearest_town, -long.y, -lat.y, -year.x, -year.y,
+                   -ring_width_A, -core_id.x, -year.x.x, -ring_width_B, 
+                   -core_id.y, -year.y.y, -ring_width_NA)
+
+# removes any extra rows
+trees_rw <- trees_rw[!is.na(trees_rw$year),]
+### note I know this is a bit inefficient but its what I got.
 
 
-### plots for data visualization
 
+############# plots for data visualization ############# 
 # separated by site to find trends
 test <- trees_rw[trees_rw$transect_id == "UVA",]
 ggplot(test, aes(year, ring_width)) + geom_line() + 
-  facet_wrap(~id, ncol = 1, switch = "y") +
-  scale_x_continuous(breaks = seq(min(test$year), 
-                                  max(test$year), by = 5))
+  facet_wrap(~id, ncol = 1, switch = "y")
   
  # plot all ring counts for slabs
 test2 <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
@@ -84,34 +118,33 @@ ggplot(test2, aes(year, ring_width)) + geom_line() +
   scale_x_continuous(breaks = seq(min(test2$year), 
                                   max(test2$year), by = 3))
 
+# views recent years
 test3 <- trees_rw[trees_rw$year > 1970,]
 test3 <- test3[test3$transect_id == "UVB",]
 ggplot(test3, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y") +
-  scale_x_continuous(breaks = seq(min(test$year), 
-                                  max(test$year), by = 1))
+  scale_x_continuous(breaks = seq(min(test3$year), 
+                                  max(test3$year), by = 1))
 
 
 
-## outlier test
+############# precipation vs ring widths ############# 
 # finds sd and mean
 rw_sd <- sd(trees_rw$ring_width, na.rm = TRUE)
 rw_mean <- mean(trees_rw$ring_width, na.rm = TRUE)
 
 # finds big rings
-outliers <- trees_rw[trees_rw$ring_width > rw_mean+(rw_sd*5),]
-outlier_rings <- trees_rw[!is.na(outliers$ring_width),]
+outliers <- trees_rw[trees_rw$ring_width > rw_mean+(rw_sd*6),]
 # high growth years 
-big_rings <- sort(unique(outlier_rings$year))
+big_rings <- sort(unique(outliers$year))
 # note 2 sds from the mean is negative
 
 
 # finding the smallest rings
-# rings smaller than 0.05 mm
-smallest <- trees_rw[trees_rw$ring_width < 0.01,]
-smallest_rings <- trees_rw[!is.na(smallest$ring_width),]
+# rings smaller than 0.01 mm
+smallest <- trees_rw[trees_rw$ring_width < 0.04,]
 # years with smallest rings
-small_rings <- sort(unique(smallest_rings$year))
+small_rings <- sort(unique(smallest$year))
 
 
 ## drought check
@@ -135,7 +168,30 @@ rainy_years
 # nope
 
 
-### detredning using dplR
+
+############# ring widths correlations ############# 
+
+ggplot(trees_rw, aes(year, ring_width)) + geom_point()
+# no trend
+
+## summary stats for each year
+year_corr <- function(year){
+  year_rw <- trees_rw[trees_rw$year == year,]
+  summary(year_rw$ring_width)
+}
+year_corr(2022)
+
+# boxplots showing no trends
+trees_cor <- trees_rw[trees_rw$year > 2000,]
+ggplot(trees_cor, aes(factor(year), ring_width)) + geom_boxplot()
+
+
+
+
+
+
+
+### detrending using dplR
 ## detrends
 
 # detrends using a conservative approach based on 
