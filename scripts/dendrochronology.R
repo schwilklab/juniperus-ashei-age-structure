@@ -9,6 +9,8 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(lme4)
+library(stringr)
+library(openmeteo)
 
 # coverts raw file into readable rind width length
 ringwidths_slabs <- read.rwl("data/ringcounts_slabs.raw")
@@ -42,8 +44,6 @@ colnames(rw_sum_cores)[2] <- "year"
 
 # makes an age data frame for use in age_structure
 age <- rbind(rw_sum_slabs, rw_sum_cores)
-
-
 
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
@@ -116,7 +116,7 @@ trees_rw <- select(trees_rw, -nearest_town, -long.y, -lat.y, -year.x, -year.y,
 
 # removes any extra rows
 trees_rw <- trees_rw[!is.na(trees_rw$year),]
-### note I know this is a bit inefficient but its what I got.
+### note I know this is a bit inefficient but its what I have
 
 
 
@@ -182,6 +182,70 @@ drought_years
 big_rings
 rainy_years
 # nope
+
+
+## better version
+
+# function that takes lattitude and longitude and returns annual precipitation
+# in mm since 1940
+get_annual_precip <- function(lat, long, property_code) {
+  location <- c(lat, long)
+  ### finds precipitation data
+  precip_data <- weather_history(location, 
+                                 start = "1940-01-01", end = "2023-12-31",
+                                 hourly = "precipitation")
+  # takes only the year
+  precip_data$datetime <- substr(precip_data$datetime, 1,4)
+  # sums years
+  precip_data <- precip_data %>% group_by(datetime) %>% 
+    summarise(sum(hourly_precipitation)) 
+  colnames(precip_data)[2] <- "precip"
+  
+  ### finds lowest and highest precipitation years
+  precip_data <- precip_data[!is.na(precip_data$precip),]
+  mean_precip <- mean(precip_data$precip)
+  sd_precip <- sd(precip_data$precip)
+  rainy_years <- precip_data[precip_data$precip > (mean_precip + (1.5 *sd_precip)),]
+  drought_years <- precip_data[precip_data$precip < (mean_precip - (1 *sd_precip)),]
+  
+  ### finds largest and smallest rings for the property
+  trees_rw_prop <- trees_rw[trees_rw$property_code == property_code,] 
+  # finds sd and mean
+  rw_sd <- sd(trees_rw_prop$ring_width, na.rm = TRUE)
+  rw_mean <- mean(trees_rw_prop$ring_width, na.rm = TRUE)
+  
+  # finds big rings
+  outliers <- trees_rw_prop[trees_rw_prop$ring_width > rw_mean+(rw_sd*3.5),]
+  wide_rings <- sort(unique(outliers$year))
+  
+  # finding the smallest rings
+  # rings smaller than 0.05 mm
+  smallest <- trees_rw_prop[trees_rw_ba$ring_width <= 0.05,]
+  # years with smallest rings
+  small_rings <- sort(unique(smallest$year))
+  
+  ### makes list to display data 
+  return(list(rainy_years = rainy_years$datetime, wide_rings = wide_rings, 
+       drought_years = drought_years$datetime, small_rings = small_rings))
+}
+
+# gets annual precip for every site
+ba_precip <- get_annual_precip(properties$lat[1], properties$long[1], "BA")
+bu_precip <- get_annual_precip(properties$lat[2], properties$long[2], "BU")
+ed_precip <- get_annual_precip(properties$lat[3], properties$long[3], "ED")
+ht_precip <- get_annual_precip(properties$lat[4], properties$long[4], "HT")
+ke_precip <- get_annual_precip(properties$lat[5], properties$long[5], "KE")
+me_precip <- get_annual_precip(properties$lat[6], properties$long[6], "ME")
+uv_precip <- get_annual_precip(properties$lat[7], properties$long[7], "UV")
+
+# edwards is the only one that seems to match up with a common drought year
+
+ring_size_test <- trees_rw[trees_rw$property_code == "ED",]
+ring_size_test <- ring_size_test[ring_size_test$year > 1940,]
+ggplot(ring_size_test, aes(year, ring_width)) + geom_line() + 
+  facet_wrap(~id, ncol = 1, switch = "y") +
+  scale_x_continuous(breaks = seq(min(1940), 
+                                  max(2023), by = 5))
 
 
 
