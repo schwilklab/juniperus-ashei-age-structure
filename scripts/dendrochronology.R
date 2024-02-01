@@ -69,6 +69,7 @@ ringwidths_cores$id <- str_match(ringwidths_cores$id, "^[A-Za-z]{3}[0-9]{2}")
 # corrects column names
 ringwidths_cores$id <- ringwidths_cores$id[,1]
 ringwidths_cores$core_id <- ringwidths_cores$core_id[,1]
+
 # seperates by core ID to make a column in trees_rw for A, B, and NA cores
 ringwidths_cores_A <- ringwidths_cores[ringwidths_cores$core_id == "A",]
 colnames(ringwidths_cores_A)[3] <- "ring_width_A"
@@ -78,6 +79,7 @@ colnames(ringwidths_cores_B)[3] <- "ring_width_B"
 
 ringwidths_cores_NA <- ringwidths_cores[is.na(ringwidths_cores$core_id),]
 colnames(ringwidths_cores_NA)[3] <- "ring_width_NA"
+
 
 ## combines data with trees data drame from "trees_read_clean.R"
 trees_rw <- left_join(trees, ringwidths_slabs, by = "id")
@@ -135,8 +137,8 @@ ggplot(test2, aes(year, ring_width)) + geom_line() +
                                   max(test2$year), by = 3))
 
 # views recent years
-test3 <- trees_rw[trees_rw$year > 1970,]
-test3 <- test3[test3$transect_id == "UVB",]
+test3 <- trees_rw[trees_rw$year > 1990,]
+test3 <- test3[test3$transect_id == "KEC",]
 ggplot(test3, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y") +
   scale_x_continuous(breaks = seq(min(test3$year), 
@@ -220,7 +222,7 @@ get_annual_precip <- function(lat, long, property_code) {
   
   # finding the smallest rings
   # rings smaller than 0.05 mm
-  smallest <- trees_rw_prop[trees_rw_ba$ring_width <= 0.05,]
+  smallest <- trees_rw_prop[trees_rw_prop$ring_width <= 0.05,]
   # years with smallest rings
   small_rings <- sort(unique(smallest$year))
   
@@ -238,9 +240,8 @@ ke_precip <- get_annual_precip(properties$lat[5], properties$long[5], "KE")
 me_precip <- get_annual_precip(properties$lat[6], properties$long[6], "ME")
 uv_precip <- get_annual_precip(properties$lat[7], properties$long[7], "UV")
 
-# edwards is the only one that seems to match up with a common drought year
 
-ring_size_test <- trees_rw[trees_rw$property_code == "ED",]
+ring_size_test <- trees_rw[trees_rw$property_code == "UV",]
 ring_size_test <- ring_size_test[ring_size_test$year > 1940,]
 ggplot(ring_size_test, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y") +
@@ -262,8 +263,24 @@ year_corr <- function(year){
 year_corr(2008)
 
 # boxplots showing no trends
-trees_cor <- trees_rw[trees_rw$year > 2000,]
-ggplot(trees_cor, aes(factor(year), ring_width)) + geom_boxplot()
+trees_cor <- trees_rw[trees_rw$year >= 2000,]
+ggplot(trees_cor, aes(factor(year), ring_width)) + 
+  geom_boxplot()
+
+
+trees_cor <- trees_rw[trees_rw$property_code == "UV",]
+ggplot(trees_cor, aes(factor(id), ring_width)) + 
+  geom_boxplot()
+
+
+# indiviual property correlations
+ke_trees_rw <- trees_rw[trees_rw$property_code == "UV",]
+ke_trees_rw <- ke_trees_rw[ke_trees_rw$year > 2000,]
+ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
+
+
+
+
 
 
 

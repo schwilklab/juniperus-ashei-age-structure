@@ -148,7 +148,7 @@ ggplot(big_trees_age, aes(dbh, year)) +
 
 ###  linear mixed effect model 
 # distance
-dist_model <- lmer(year ~ distance + (1 |transect_id) +(1 |dbh), 
+dist_model <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id), 
                    data = trees_age)
 
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
@@ -166,6 +166,7 @@ ggplot(trees_age, aes(distance, year, color=property_id)) +
     y = "Ring count",
     color = "Property"
   ) +
+  theme(legend.position = c(0.9, 0.9)) +
   # Estiamte
   geom_abline(intercept = dist_model_anova_coeff[1], 
               slope = dist_model_anova_coeff[2],
@@ -186,7 +187,7 @@ ggplot(trees_age, aes(distance, year, color=property_id)) +
 
 
 ## for elvation
-elev_model <- lmer(year ~ elev_dif + (1 |transect_id) +(1 |dbh), 
+elev_model <- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id) +(1|dbh), 
                    data = trees_age)
 
 elev_model_anova = Anova(elev_model, type = 2, test.statistic = "F")
