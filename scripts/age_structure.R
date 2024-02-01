@@ -148,7 +148,7 @@ ggplot(big_trees_age, aes(dbh, year)) +
 
 ###  linear mixed effect model 
 # distance
-dist_model <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id), 
+dist_model <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id) +(1|dbh), 
                    data = trees_age)
 
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
@@ -186,6 +186,45 @@ ggplot(trees_age, aes(distance, year, color=property_id)) +
 
 
 
+# taking out farthest points
+trees_age_close <- trees_age[trees_age$distance<=200,]
+
+dist_model_close <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id), 
+                   data = trees_age_close)
+
+dist_model_close_anova = Anova(dist_model_close, type = 2, test.statistic = "F")
+# P = 0.9284, not significant
+
+dist_model_close_anova_coeff = summary(dist_model_close)$coefficients
+
+ggplot(trees_age_close, aes(distance, year, color=property_id)) + 
+  geom_point(size=4) + 
+  labs(
+    x = "Distance from start of transect (m)",
+    y = "Ring count",
+    color = "Property"
+  ) +
+  theme(legend.position = c(0.9, 0.9)) +
+  # Estiamte
+  geom_abline(intercept = dist_model_close_anova_coeff[1], 
+              slope = dist_model_close_anova_coeff[2],
+              size = 1.5,
+              color = "black") +
+  geom_abline(intercept = (dist_model_close_anova_coeff[1] + 
+                             dist_model_close_anova_coeff[1,2]), 
+              slope = dist_model_close_anova_coeff[2],
+              size = 1.5,
+              color = "red") +
+  geom_abline(intercept = (dist_model_close_anova_coeff[1] - 
+                             dist_model_close_anova_coeff[1,2]), 
+              slope = dist_model_close_anova_coeff[2],
+              size = 1.5,
+              color = "red")
+
+
+
+
+
 ## for elvation
 elev_model <- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id) +(1|dbh), 
                    data = trees_age)
@@ -211,7 +250,7 @@ ggplot(trees_age, aes(elev_dif, year, color=property_id)) +
               size = 1.5,
               color = "black") +
   # standard error
-  geom_abline(intercept = (elev_model_anova_coeff[1] + 
+   geom_abline(intercept = (elev_model_anova_coeff[1] + 
                              elev_model_anova_coeff[1,2]), 
               slope = elev_model_anova_coeff[2],
               size = 1.5,
@@ -219,6 +258,43 @@ ggplot(trees_age, aes(elev_dif, year, color=property_id)) +
   geom_abline(intercept = (elev_model_anova_coeff[1] - 
                              elev_model_anova_coeff[1,2]), 
               slope = elev_model_anova_coeff[2],
+              size = 1.5,
+              color = "red")
+
+
+
+# taking out highest points
+trees_age_low <- trees_age[trees_age$elev_dif<=50,]
+
+dist_model_low <- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id), 
+                         data = trees_age_close)
+
+dist_model_low_anova = Anova(dist_model_low, type = 2, test.statistic = "F")
+# P = 0.9284, not significant
+
+dist_model_low_anova_coeff = summary(dist_model_low)$coefficients
+
+ggplot(trees_age_low, aes(elev_dif, year, color=property_id)) + 
+  geom_point(size=4) + 
+  labs(
+    x = "Elevation from start of transect (m)",
+    y = "Ring count",
+    color = "Property"
+  ) +
+  theme(legend.position = c(0.9, 0.9)) +
+  # Estiamte
+  geom_abline(intercept = dist_model_low_anova_coeff[1], 
+              slope = dist_model_low_anova_coeff[2],
+              size = 1.5,
+              color = "black") +
+  geom_abline(intercept = (dist_model_low_anova_coeff[1] + 
+                             dist_model_low_anova_coeff[1,2]), 
+              slope = dist_model_low_anova_coeff[2],
+              size = 1.5,
+              color = "red") +
+  geom_abline(intercept = (dist_model_low_anova_coeff[1] - 
+                             dist_model_low_anova_coeff[1,2]), 
+              slope = dist_model_low_anova_coeff[2],
               size = 1.5,
               color = "red")
 

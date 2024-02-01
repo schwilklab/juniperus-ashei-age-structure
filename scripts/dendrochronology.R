@@ -267,6 +267,21 @@ trees_cor <- trees_rw[trees_rw$year >= 2000,]
 ggplot(trees_cor, aes(factor(year), ring_width)) + 
   geom_boxplot()
 
+# model for year vs ring width
+rw_model <- lmer(ring_width ~ year +(1|property_id),  
+                   data = trees_rw)
+
+rw_model_anova = Anova(rw_model)
+rw_model_anova_coeff = summary(rw_model)$coefficients
+
+# correaltions of ring width
+ggplot(trees_rw, aes(year, ring_width)) + 
+  geom_point() +
+  geom_abline(intercept = rw_model_anova_coeff[[1]], 
+              slope = rw_model_anova_coeff[[2]],
+              size = 1.5,
+              color = "black")
+
 
 trees_cor <- trees_rw[trees_rw$property_code == "UV",]
 ggplot(trees_cor, aes(factor(id), ring_width)) + 
