@@ -11,18 +11,20 @@ library(tidyr)
 library(lme4)
 library(stringr)
 library(openmeteo)
+library(car)
 
 # coverts raw file into readable rind width length
 ringwidths_slabs <- read.rwl("data/ringcounts_slabs.raw")
 ringwidths_cores <- read.rwl("data/ringcounts_cores.raw")
+# loads in multistemmed data
+ringwidths_ms <- read.rwl("data/ringcounts_multistemmed.raw")
 
 # blank objects stops code from running, so blank objects are removed
-# data will be edited later
-ringwidths_slabs$KEB07 
-ringwidths_slabs$UVA02
 ringwidths_slabs <- select(ringwidths_slabs, -KEB07)
 ringwidths_slabs <- select(ringwidths_slabs, -UVA02)
 ringwidths_slabs <- select(ringwidths_slabs, -UVA04)
+# corrects incorrect name
+colnames(ringwidths_ms)[7] <- "UVB04_1"
 
 
 ## creates data frame of inital ring counts
@@ -31,14 +33,15 @@ rw_sum_slabs <- summary(ringwidths_slabs)
 rw_sum_slabs <- select(rw_sum_slabs, c("series", "year"))
 colnames(rw_sum_slabs)[1] <- "id"
 
-# cleans cores to match years 
+
+# cleans cores to match sample id
 rw_sum_cores <- summary(ringwidths_cores)
 # selects out individual ids
 rw_sum_cores$core_id <- str_match(rw_sum_cores$series, "[A-Za-z]$")
 rw_sum_cores$id <- str_match(rw_sum_cores$series, "^[A-Za-z]{3}[0-9]{2}")
 # finds oldest core for each individual 
 rw_sum_cores <- select(rw_sum_cores, c(id, year, core_id))
-rw_sum_cores <- rw_sum_cores %>% group_by(, id) %>% summarise(max(year))
+rw_sum_cores <- rw_sum_cores %>% group_by(, id) %>% summarize(max(year))
 colnames(rw_sum_cores)[1] <- "id"
 colnames(rw_sum_cores)[2] <- "year"
 
@@ -48,8 +51,10 @@ age <- rbind(rw_sum_slabs, rw_sum_cores)
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
 
-
-
+## detrends data based on Fritz 2001
+ringwidths_slabs <- detrend(rwl = ringwidths_slabs, method = "ModNegExp")
+ringwidths_cores <- detrend(rwl = ringwidths_cores, method = "ModNegExp")
+ringwidths_ms <- detrend(rwl = ringwidths_ms, method = "ModNegExp")
 
 ############# cleans data ############
 # widens slabs
@@ -120,74 +125,39 @@ trees_rw <- select(trees_rw, -nearest_town, -long.y, -lat.y, -year.x, -year.y,
 trees_rw <- trees_rw[!is.na(trees_rw$year),]
 ### note I know this is a bit inefficient but its what I have
 
+# cleans multistemmed data
+ringwidths_ms$year <- as.numeric(rownames(ringwidths_ms))
+ringwidths_ms <- pivot_longer(ringwidths_ms, cols = -year,  
+                                 names_to = "id", values_to = "ring_width")
+ringwidths_slabs <- na.omit(ringwidths_ms)
+
 
 
 ############# plots for data visualization ############# 
 # separated by site to find trends
-test <- trees_rw[trees_rw$transect_id == "KEA",]
-ggplot(test, aes(year, ring_width)) + geom_line() + 
+transect_rw <- trees_rw[trees_rw$transect_id == "KEA",]
+ggplot(transect_rw, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y")
   
  # plot all ring counts for slabs
-test2 <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
-test2 <- test2[grep("UVA02", test2$id),]
-ggplot(test2, aes(year, ring_width)) + geom_line() + 
+id_rw <- ringwidths_slabs[!is.na(ringwidths_slabs$ring_width),]
+id_rw <- id_rw[grep("UVA02", id_rw$id),]
+ggplot(id_rw, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y") +
-  scale_x_continuous(breaks = seq(min(test2$year), 
-                                  max(test2$year), by = 3))
+  scale_x_continuous(breaks = seq(min(id_rw$year), 
+                                  max(id_rw$year), by = 3))
 
 # views recent years
-test3 <- trees_rw[trees_rw$year > 1990,]
-test3 <- test3[test3$transect_id == "KEC",]
-ggplot(test3, aes(year, ring_width)) + geom_line() + 
+recnt_rw <- trees_rw[trees_rw$year > 1990,]
+recnt_rw <- recnt_rw[recnt_rw$transect_id == "KEC",]
+ggplot(recnt_rw, aes(year, ring_width)) + geom_line() + 
   facet_wrap(~id, ncol = 1, switch = "y") +
-  scale_x_continuous(breaks = seq(min(test3$year), 
-                                  max(test3$year), by = 1))
+  scale_x_continuous(breaks = seq(min(recnt_rw$year), 
+                                  max(recnt_rw$year), by = 1))
 
 
 
 ############# precipation vs ring widths ############# 
-# finds sd and mean
-rw_sd <- sd(trees_rw$ring_width, na.rm = TRUE)
-rw_mean <- mean(trees_rw$ring_width, na.rm = TRUE)
-
-# finds big rings
-outliers <- trees_rw[trees_rw$ring_width > rw_mean+(rw_sd*6),]
-# high growth years 
-big_rings <- sort(unique(outliers$year))
-# note 2 sds from the mean is negative
-
-
-# finding the smallest rings
-# rings smaller than 0.01 mm
-smallest <- trees_rw[trees_rw$ring_width < 0.04,]
-# years with smallest rings
-small_rings <- sort(unique(smallest$year))
-
-
-## drought check
-rainfall <- read.csv("data/USGS_kerrville_rainfall.csv")
-
-# finds years less that 1.5 sd away from the mean
-rainfall_low <- mean(rainfall$TOTAL) - (sd(rainfall$TOTAL)*1.5)
-droughts <- rainfall[rainfall$TOTAL < rainfall_low,]
-drought_years <- droughts$YEAR
-# finds rainy seasons
-rainfall_high <- mean(rainfall$TOTAL) + (sd(rainfall$TOTAL)*1.5)
-rainy <- rainfall[rainfall$TOTAL > rainfall_high,]
-rainy_years <- rainy$YEAR
-
-# do droughts and rainy seasons match up
-small_rings
-drought_years
-
-big_rings
-rainy_years
-# nope
-
-
-## better version
-
 # function that takes lattitude and longitude and returns annual precipitation
 # in mm since 1940
 get_annual_precip <- function(lat, long, property_code) {
@@ -241,6 +211,7 @@ me_precip <- get_annual_precip(properties$lat[6], properties$long[6], "ME")
 uv_precip <- get_annual_precip(properties$lat[7], properties$long[7], "UV")
 
 
+# graph to visualize above results
 ring_size_test <- trees_rw[trees_rw$property_code == "UV",]
 ring_size_test <- ring_size_test[ring_size_test$year > 1940,]
 ggplot(ring_size_test, aes(year, ring_width)) + geom_line() + 
@@ -279,7 +250,7 @@ ggplot(trees_rw, aes(year, ring_width)) +
   geom_point() +
   geom_abline(intercept = rw_model_anova_coeff[[1]], 
               slope = rw_model_anova_coeff[[2]],
-              size = 1.5,
+              linewidth = 1.5,
               color = "black")
 
 
@@ -295,6 +266,12 @@ ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 
 
 
+############# same individual ring widths correlations ############# 
+ringwidths_ms$ind_id <- str_match(ringwidths_ms$id, "^[A-Za-z]{3}[0-9]{2}")
+ringwidths_ms
+
+ggplot(ringwidths_ms, aes(year, ring_width, color = ind_id )) + geom_line() + 
+  facet_wrap(~id, ncol = 1, switch = "y")
 
 
 
@@ -302,9 +279,7 @@ ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 
 
 
-
-
-### detrending using dplR
+############# cross-dating using dplR############# 
 ## detrends
 
 # detrends using a conservative approach based on 
@@ -398,19 +373,12 @@ glk_slabs$glk_mat
 
 
 
-### crossdating using lmer
-head(trees_rw)
-
-trees_lmer <- trees_rw[!(is.na(trees_rw$ring_width)),]
+### detrend using lmer
 trees_lmer <- lmer(ring_width ~ exp(-year) + (1|property_id) + (1|id),
-                   data = trees_lmer)
-plot(trees_lmer)
+                   data = trees_rw)
 
-trees_lmer <- trees_rw[!(is.na(trees_rw$ring_width)),]
-trees_lmer <- lmer(ring_width ~ year +(1|property_id) +(1|id),
-                   data = trees_lmer)
 Anova(trees_lmer)
 summary(trees_lmer)
 plot(trees_lmer)
-
+## unsure where to go from here
 
