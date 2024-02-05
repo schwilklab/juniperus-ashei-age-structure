@@ -5,6 +5,8 @@
 
 library(maps)
 library(tmap)
+library(dplyr)
+library(ggplot2)
 
 
 # selects needed variables
@@ -21,9 +23,18 @@ texas <- map_data("state") %>%
 texas_counties <- map_data("county") %>%
   filter(region == "texas")
 
+colorscheme <- c(
+  "Bandera_2022-35" = "#AA6F9E",
+  "Burnet_2022-16" = "#1965B0",
+  "Edwards_2022-25" = "#7BAFDE",
+  "Hays-Travis_2022-02" = "#4EB265",
+  "Kerr_2021-36" = "#F7F056",
+  "Medina_2022-04" = "#EE8026",
+  "Uvalde_2021-03" = "#DC050C"
+)
 
 ggplot(texas, aes(long, lat)) +
-  geom_polygon(color = "black", fill = "grey") +
+  geom_polygon(color = "black", fill = "#BBBBBB") +
   theme_bw() +
   geom_polygon(aes(group = group), data = texas_counties,
                fill = "NA", color = "white") +
@@ -38,11 +49,16 @@ ggplot(texas, aes(long, lat)) +
   theme(
     panel.grid = element_blank(),
     strip.background = element_rect(fill = NA, linewidth = 1),
+    text = element_text(family = "Times New Roman"),
     strip.text = element_text(size = 16),
     axis.title = element_text(size = 18),
     axis.text = element_text(size = 16),
     panel.border = element_rect(linewidth = 2),
-    legend.title = element_text(size = 14),
-    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14),
     legend.position = c(0.15, 0.8)
-  )
+  ) +
+  scale_color_manual(values = colorscheme)
+
+
+

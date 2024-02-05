@@ -6,7 +6,17 @@
 library(geosphere)
 library(ggplot2)
 library(elevatr) 
+library(dplyr)
 library(car)
+
+
+KEA09 <- filter(age, id %in% c("KEA09top", "KEA09bot"))
+KEA09 <- tibble(id = "KEA09", year = sum(KEA09$year))
+
+KEB07 <- filter(age, id %in% c("KEB07out", "KEB07in"))
+KEB07 <- tibble(id = "KEB07", year = sum(KEB07$year))
+
+age <- rbind(age, KEA09, KEB07)
 
 # merge field data with ring counts
 trees_age <- dplyr::left_join(trees, age, by = "id")
@@ -28,7 +38,7 @@ get_cords <- function(long, lat, id) {
                            y = lat, 
                            names = id)
   # wgs 84
-  elev <- get_elev_point(locations = sample_pts, prj = 4326)
+  elev <- get_elev_point(locations = sample_pts, prj = 4326, src="epqs")
   return(elev[[3]])
 }
 
@@ -36,119 +46,53 @@ get_cords <- function(long, lat, id) {
 trees_age$sample_elev <- get_cords(trees_age$long.x, trees_age$lat.x, trees_age$id)
 trees_age$transect_elev <- get_cords(trees_age$transect_long, 
                                      trees_age$transect_lat, trees_age$id)
-trees_age$elev_dif <- trees_age$sample_elev - trees_age$transect_elev
+trees_age$elev_dif <- abs(trees_age$sample_elev - trees_age$transect_elev)
 
 
 
+# oldest tree in the east
+trees_age_HT <- trees_age[trees_age$property_code == "HT",]
+max(trees_age_HT$year, na.rm = TRUE)
 ## plots
 
 # theme for plots
 theme <- theme_bw() +
   theme(
-    panel.grid = element_blank(),
     legend.title = element_text(size = 16),
     legend.text = element_text(size = 12),
     strip.background = element_rect(fill = NA, linewidth = 1),
     strip.text = element_text(size = 16),
     axis.title = element_text(size = 18),
     axis.text = element_text(size = 16),
-    panel.border = element_rect(linewidth = 2)
+    panel.border = element_rect(linewidth = 2),
+    text = element_text(family = "Times New Roman")
   )
 
-## disance plots 
+# color scheme
+colorscheme <- c(
+  "Bandera_2022-35" = "#AA6F9E",
+  "Burnet_2022-16" = "#1965B0",
+  "Edwards_2022-25" = "#7BAFDE",
+  "Hays-Travis_2022-02" = "#4EB265",
+  "Kerr_2021-36" = "#F7F056",
+  "Medina_2022-04" = "#EE8026",
+  "Uvalde_2021-03" = "#DC050C"
+)
 
-# age vs distance
-ggplot(trees_age, aes(distance, year, color=transect_id)) + 
-  geom_point() +
-  facet_wrap(~transect_id) +
-  labs(
-    x = "Distance from start of transect (m)",
-    y = "Ring Count",
-    color = "Transect"
-  )
-
-# dbh vs distance 
-ggplot(trees_age, aes(distance, dbh, color=transect_id)) + 
-  geom_point() +
-  facet_wrap(~transect_id) +
-  labs(
-    x = "Distance from start of transect (m)",
-    y = "DBH",
-    color = "Transect"
-  )
-
-# age vs distance
-ggplot(trees_age, aes(distance, year, color=property_id)) + 
-  geom_point(size=4) + 
-  labs(
-    x = "Distance from start of transect (m)",
-    y = "Ring count",
-    color = "Property"
-  ) + theme
-
- # dbh vs distance
-ggplot(trees_age, aes(distance, dbh, color=property_id)) + 
-  geom_point(size=4) + 
-  labs(
-    x = "Distance from start of transect (m)",
-    y = "Diameter at breast height (cm)",
-    color = "Property"
-  ) + theme
-
-# age vs elevation
-ggplot(trees_age, aes(elev_dif, year, color=property_id)) + 
-  geom_point(size=4) + 
-  labs(
-    x = "Elevation from start of transect (m)",
-    y = "Ring count",
-    color = "Property"
-  ) + theme +
-  theme(legend.position = c(0.85, 0.75))
-
-# age vs elevatio
-ggplot(trees_age, aes(elev_dif, year, color=transect_id)) + 
-  geom_point() +
-  facet_wrap(~transect_id) +
-  labs(
-    x = "Elevation from start of transect (m)",
-    y = "Ring Count",
-    color = "Transect"
-  )
-
-# ring count frequ
-ggplot(trees_age, aes(year)) + 
-  geom_histogram(binwidth = 10) + 
+# ring count freq
+ggplot(trees_age, aes(year, color = "black")) + 
+  geom_histogram(binwidth = 10, color = "white") + 
   labs(
     x = "Ring Count",
-    y = "Frequency"
-  ) + theme
-
-oldest_trees <- trees_age[!is.na(trees_age),]
-oldest_trees <- oldest_trees[oldest_trees$year >= 200,]
-oldest_trees <- oldest_trees[!is.na(oldest_trees$id),]
-max(oldest_trees$year)
-### linear regression btheme### linear regression between ring count and dbh
-linear_reg_dbh_year <- lm(dbh ~ year, data = trees_age)
-linear_reg_dbh_year_mod <- linear_reg_dbh_year[[1]]
-
-summary(linear_reg_dbh_year)
-# r^2 is 0.45085
-
-ggplot(big_trees_age, aes(dbh, year)) +
-  geom_point(size=4) + 
-  labs(
-    x = "Diameter at breast height (cm)",
-    y = "Ring count"
-  ) + 
-  geom_abline(intercept = linear_reg_dbh_year_mod[1],
-              slope =linear_reg_dbh_year_mod[2]) +
-  theme 
-
+    y = "Individuals"
+  ) + theme +
+  scale_x_continuous(breaks= seq(0, 300, 50)) +
+  scale_y_continuous(breaks= seq(0, 30, 5))
 
 
 ###  linear mixed effect model 
 # distance
-dist_model <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id) +(1|dbh), 
+dist_model <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id), 
                    data = trees_age)
 
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
@@ -166,135 +110,32 @@ ggplot(trees_age, aes(distance, year, color=property_id)) +
     y = "Ring count",
     color = "Property"
   ) +
-  theme(legend.position = c(0.9, 0.9)) +
-  # Estiamte
-  geom_abline(intercept = dist_model_anova_coeff[1], 
-              slope = dist_model_anova_coeff[2],
-              size = 1.5,
-              color = "black") +
-  # standard error
-  geom_abline(intercept = (dist_model_anova_coeff[1] + 
-                             dist_model_anova_coeff[1,2]), 
-              slope = dist_model_anova_coeff[2],
-              size = 1.5,
-              color = "red") +
-  geom_abline(intercept = (dist_model_anova_coeff[1] - 
-                             dist_model_anova_coeff[1,2]), 
-              slope = dist_model_anova_coeff[2],
-              size = 1.5,
-              color = "red")
+  theme +
+  theme(legend.position = c(0.9, 0.85)) +
+  scale_color_manual(values = colorscheme) +
+  scale_y_continuous(breaks= seq(0, 300, 50))
+  
+
 
 
 
 # taking out farthest points
-trees_age_close <- trees_age[trees_age$distance<=200,]
-
-dist_model_close <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id), 
-                   data = trees_age_close)
-
-dist_model_close_anova = Anova(dist_model_close, type = 2, test.statistic = "F")
-# P = 0.9284, not significant
-
-dist_model_close_anova_coeff = summary(dist_model_close)$coefficients
-
-ggplot(trees_age_close, aes(distance, year, color=property_id)) + 
-  geom_point(size=4) + 
-  labs(
-    x = "Distance from start of transect (m)",
-    y = "Ring count",
-    color = "Property"
-  ) +
-  theme(legend.position = c(0.9, 0.9)) +
-  # Estiamte
-  geom_abline(intercept = dist_model_close_anova_coeff[1], 
-              slope = dist_model_close_anova_coeff[2],
-              size = 1.5,
-              color = "black") +
-  geom_abline(intercept = (dist_model_close_anova_coeff[1] + 
-                             dist_model_close_anova_coeff[1,2]), 
-              slope = dist_model_close_anova_coeff[2],
-              size = 1.5,
-              color = "red") +
-  geom_abline(intercept = (dist_model_close_anova_coeff[1] - 
-                             dist_model_close_anova_coeff[1,2]), 
-              slope = dist_model_close_anova_coeff[2],
-              size = 1.5,
-              color = "red")
-
-
-
-
-
-## for elvation
-elev_model <- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id) +(1|dbh), 
+elev_model<- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id), 
                    data = trees_age)
 
 elev_model_anova = Anova(elev_model, type = 2, test.statistic = "F")
 # P = 0.9284, not significant
 
 elev_model_anova_coeff = summary(elev_model)$coefficients
-elev_model_anova_coeff[1]
 
-###plots
-# Linear Mixed effect mdel
-ggplot(trees_age, aes(elev_dif, year, color=property_id)) + 
+ggplot(trees_age_close, aes(elev_dif, year, color=property_id)) + 
   geom_point(size=4) + 
   labs(
-    x = "Elevation from start of transect (m)",
+    x = "Elevation difference from start of transect (m)",
     y = "Ring count",
     color = "Property"
   ) +
-  # Estiamte
-  geom_abline(intercept = elev_model_anova_coeff[1], 
-              slope = elev_model_anova_coeff[2],
-              size = 1.5,
-              color = "black") +
-  # standard error
-   geom_abline(intercept = (elev_model_anova_coeff[1] + 
-                             elev_model_anova_coeff[1,2]), 
-              slope = elev_model_anova_coeff[2],
-              size = 1.5,
-              color = "red") +
-  geom_abline(intercept = (elev_model_anova_coeff[1] - 
-                             elev_model_anova_coeff[1,2]), 
-              slope = elev_model_anova_coeff[2],
-              size = 1.5,
-              color = "red")
-
-
-
-# taking out highest points
-trees_age_low <- trees_age[trees_age$elev_dif<=50,]
-
-dist_model_low <- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id), 
-                         data = trees_age_close)
-
-dist_model_low_anova = Anova(dist_model_low, type = 2, test.statistic = "F")
-# P = 0.9284, not significant
-
-dist_model_low_anova_coeff = summary(dist_model_low)$coefficients
-
-ggplot(trees_age_low, aes(elev_dif, year, color=property_id)) + 
-  geom_point(size=4) + 
-  labs(
-    x = "Elevation from start of transect (m)",
-    y = "Ring count",
-    color = "Property"
-  ) +
-  theme(legend.position = c(0.9, 0.9)) +
-  # Estiamte
-  geom_abline(intercept = dist_model_low_anova_coeff[1], 
-              slope = dist_model_low_anova_coeff[2],
-              size = 1.5,
-              color = "black") +
-  geom_abline(intercept = (dist_model_low_anova_coeff[1] + 
-                             dist_model_low_anova_coeff[1,2]), 
-              slope = dist_model_low_anova_coeff[2],
-              size = 1.5,
-              color = "red") +
-  geom_abline(intercept = (dist_model_low_anova_coeff[1] - 
-                             dist_model_low_anova_coeff[1,2]), 
-              slope = dist_model_low_anova_coeff[2],
-              size = 1.5,
-              color = "red")
-
+  theme +
+  theme(legend.position = c(0.9, 0.85)) +
+  scale_color_manual(values = colorscheme) +
+  scale_y_continuous(breaks= seq(0, 300, 50))

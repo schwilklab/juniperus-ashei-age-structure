@@ -23,9 +23,13 @@ ringwidths_ms <- read.rwl("data/ringcounts_multistemmed.raw")
 ringwidths_slabs <- select(ringwidths_slabs, -KEB07)
 ringwidths_slabs <- select(ringwidths_slabs, -UVA02)
 ringwidths_slabs <- select(ringwidths_slabs, -UVA04)
-# corrects incorrect name
+# corrects incorrect names
 colnames(ringwidths_ms)[7] <- "UVB04_1"
-
+colnames(ringwidths_slabs)[158] <- "KEB12"
+colnames(ringwidths_slabs)[255] <- "UVB11"
+# oldest stem
+colnames(ringwidths_slabs)[192] <- "UVA02"
+colnames(ringwidths_slabs)[192] <- "UVA02"
 
 ## creates data frame of inital ring counts
 rw_sum_slabs <- summary(ringwidths_slabs)
@@ -125,6 +129,17 @@ trees_rw <- select(trees_rw, -nearest_town, -long.y, -lat.y, -year.x, -year.y,
 trees_rw <- trees_rw[!is.na(trees_rw$year),]
 ### note I know this is a bit inefficient but its what I have
 
+
+
+
+## summaries for paper
+count(age[age$year >= 200,])
+summary(age$year)
+summary(trees_rw$ring_width)
+
+
+
+
 # cleans multistemmed data
 ringwidths_ms$year <- as.numeric(rownames(ringwidths_ms))
 ringwidths_ms <- pivot_longer(ringwidths_ms, cols = -year,  
@@ -223,9 +238,6 @@ ggplot(ring_size_test, aes(year, ring_width)) + geom_line() +
 
 ############# ring widths correlations ############# 
 
-ggplot(trees_rw, aes(year, ring_width)) + geom_point()
-# no trend
-
 ## summary stats for each year
 year_corr <- function(year){
   year_rw <- trees_rw[trees_rw$year == year,]
@@ -267,16 +279,32 @@ ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 
 
 ############# same individual ring widths correlations ############# 
-ringwidths_ms$ind_id <- str_match(ringwidths_ms$id, "^[A-Za-z]{3}[0-9]{2}")
-ringwidths_ms
+ringwidths_ms$individual <- str_match(ringwidths_ms$id, "^[A-Za-z]{3}[0-9]{2}")
 
-ggplot(ringwidths_ms, aes(year, ring_width, color = ind_id )) + geom_line() + 
-  facet_wrap(~id, ncol = 1, switch = "y")
+colorscheme_ms <- c(
+  "HTA28" = "#4477AA",
+  "HTB06" = "#66CCEE",
+  "KEA03" = "#228833",
+  "UVA02" = "#CCBB44",
+  "UVB04" = "#EE6677",
+  "UVB16" = "#AA3377"
+)
+labels_ms <- unique(ringwidths_ms$id)
+names(labels_ms) <- c("1", "2", "1", "2", "1", "2", "1", "2", "3", "4", "1", "2", 
+           "1", "2")
 
 
-
-
-
+ggplot(ringwidths_ms, aes(year, ring_width, color = individual )) + geom_line() + 
+  facet_wrap(~id, ncol = 1, switch = "y") +
+  scale_color_manual(values = colorscheme_ms) +
+  scale_x_continuous(breaks= seq(1850, 2025, 10)) +
+  scale_y_continuous(breaks= c(1,3,5)) +
+  theme +
+  labs(
+    x = "Year",
+    y = "Ring width index",
+    color = "Indiviual")
+##### i cant figure out how to change id label names grrrrrr
 
 
 ############# cross-dating using dplR############# 
@@ -295,22 +323,17 @@ plot(chronology_slabs, add.spline=TRUE, nyrs=30)
 
 
 
-## individual series correlation
-# seperates by site
-ba <- ringwidths_slabs[grep("^BA", names(rwi_slabs))]
-bu <- ringwidths_slabs[grep("^BU", names(rwi_slabs))]
-ed <- ringwidths_slabs[grep("^ED", names(rwi_slabs))]
-ht <- ringwidths_slabs[grep("^HT", names(rwi_slabs))]
-ke <- ringwidths_slabs[grep("^KE", names(rwi_slabs))]
-me <- ringwidths_slabs[grep("^ME", names(rwi_slabs))]
-uv <- ringwidths_slabs[grep("^UV", names(rwi_slabs))]
-
 # Blue correlates well 
 # (p-values less or equal to the user-set critical value) 
 # Red is potential dating problems 
 # (p-values greater than the user-set critical value). 
 # Green lines show segments that do not completely overlap the time period
 # no correlations calculated. 
+
+# removes extra series
+rwi_slabs <- select(rwi_slabs, -KEB07out, -KEB07in, -KEA09top, -KEA09bot,
+                           -unknown, -UVA02_1, -UVA02_3, -UVB11A, -KEB12)
+# correlation plot
 rwl <- corr.rwl.seg(rwi_slabs, seg.length=10, pcrit=0.05)
 
 
