@@ -293,18 +293,24 @@ labels_ms <- unique(ringwidths_ms$id)
 names(labels_ms) <- c("1", "2", "1", "2", "1", "2", "1", "2", "3", "4", "1", "2", 
            "1", "2")
 
+ringwidths_ms_recent <- ringwidths_ms[ringwidths_ms$year >= 2000,]
 
-ggplot(ringwidths_ms, aes(year, ring_width, color = individual )) + geom_line() + 
-  facet_wrap(~id, ncol = 1, switch = "y") +
+# labels for facet wrap
+new_ids <- c("1", "2", "1", "2", "3", "4", "1", "2", "1", "2", "1", "2", "1", "2")
+names(new_ids) <- unique(ringwidths_ms$id)
+
+
+ggplot(ringwidths_ms_recent, aes(year, ring_width, color = individual )) + 
+  geom_line(size = 1) + 
+  facet_wrap(~id, ncol = 1, switch = "y", labeller = labeller(id = new_ids)) +
   scale_color_manual(values = colorscheme_ms) +
-  scale_x_continuous(breaks= seq(1850, 2025, 10)) +
+  scale_x_continuous(breaks= seq(2000, 2022, 2)) +
   scale_y_continuous(breaks= c(1,3,5)) +
   theme +
   labs(
     x = "Year",
     y = "Ring width index",
     color = "Indiviual")
-##### i cant figure out how to change id label names grrrrrr
 
 
 ############# cross-dating using dplR############# 

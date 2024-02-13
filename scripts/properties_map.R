@@ -40,7 +40,7 @@ ggplot(texas, aes(long, lat)) +
                fill = "NA", color = "white") +
   geom_polygon(color = "black", fill = "NA") +
   geom_point(data = site_map, aes(color = property_id),
-             shape = 19, size = 5) +
+             shape = 19, size = 7) +
   labs(fill = "",
        x = expression("Longitude ("*~degree*")"),
        y = expression("Latitude ("*~degree*")"),
@@ -50,15 +50,20 @@ ggplot(texas, aes(long, lat)) +
     panel.grid = element_blank(),
     strip.background = element_rect(fill = NA, linewidth = 1),
     text = element_text(family = "Times New Roman"),
-    strip.text = element_text(size = 16),
-    axis.title = element_text(size = 18),
-    axis.text = element_text(size = 16),
+    strip.text = element_text(size = 18),
+    axis.title = element_text(size = 20),
+    axis.text = element_text(size = 18),
     panel.border = element_rect(linewidth = 2),
-    legend.title = element_text(size = 16),
-    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 17),
     legend.position = c(0.15, 0.8)
   ) +
   scale_color_manual(values = colorscheme)
 
 
 
+#### properties table
+data <- data.frame(
+  Category = c("A", "B", "C", "D"),
+  Value = c(10, 20, 15, 25)
+)

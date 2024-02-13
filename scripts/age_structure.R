@@ -58,12 +58,12 @@ max(trees_age_HT$year, na.rm = TRUE)
 # theme for plots
 theme <- theme_bw() +
   theme(
-    legend.title = element_text(size = 16),
-    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 20),
+    legend.text = element_text(size = 16),
     strip.background = element_rect(fill = NA, linewidth = 1),
-    strip.text = element_text(size = 16),
-    axis.title = element_text(size = 18),
-    axis.text = element_text(size = 16),
+    strip.text = element_text(size = 18),
+    axis.title = element_text(size = 24),
+    axis.text = element_text(size = 20),
     panel.border = element_rect(linewidth = 2),
     text = element_text(family = "Times New Roman")
   )
@@ -84,7 +84,7 @@ ggplot(trees_age, aes(year, color = "black")) +
   geom_histogram(binwidth = 10, color = "white") + 
   labs(
     x = "Ring Count",
-    y = "Individuals"
+    y = "Number of Individuals"
   ) + theme +
   scale_x_continuous(breaks= seq(0, 300, 50)) +
   scale_y_continuous(breaks= seq(0, 30, 5))
@@ -103,10 +103,35 @@ dist_model_anova_coeff[1]
 
 ###plots
 # Linear Mixed effect mdel
+
+# removes small and incomplete transect
+trees_age_transects <- trees_age[!trees_age$transect_id == "BAB",]
+trees_age_transects <- trees_age_transects[!trees_age_transects$transect_id == "EDA",]
+
+# creates label names 
+new_trans_ids <- c("Bandera", "Burnet", "Edwards", "Hays-Travis-A", "Hays-Travis-B", 
+             "Kerr-A", "Kerr-B", "Kerr-C", "Medina-A", "Medina-B", "Uvalde-A", 
+             "Uvalde-B")
+names(new_trans_ids) <- unique(trees_age_transects$transect_id)
+
+ggplot(trees_age_transects, aes(distance, year)) + 
+  geom_point(size=4) + 
+  facet_wrap(~transect_id, nrow = 4, ncol = 3,
+             labeller = labeller(transect_id = new_trans_ids)) +
+  labs(
+    x = "Distance from start of transect (m)",
+    y = "Ring count",
+    color = "Property"
+  ) +
+  theme +
+  theme(legend.position = "none") +
+  scale_y_continuous(breaks= seq(0, 250, 50)) 
+  
+## all together
 ggplot(trees_age, aes(distance, year, color=property_id)) + 
   geom_point(size=4) + 
   labs(
-    x = "Distance from start of transect (m)",
+    x = "Elevation difference from start of transect (m)",
     y = "Ring count",
     color = "Property"
   ) +
@@ -114,8 +139,6 @@ ggplot(trees_age, aes(distance, year, color=property_id)) +
   theme(legend.position = c(0.9, 0.85)) +
   scale_color_manual(values = colorscheme) +
   scale_y_continuous(breaks= seq(0, 300, 50))
-  
-
 
 
 
