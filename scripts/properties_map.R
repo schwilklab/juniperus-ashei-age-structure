@@ -7,44 +7,38 @@ library(maps)
 library(tmap)
 library(dplyr)
 library(ggplot2)
+library(sf)
 
-
-# selects needed variables
-site_map <- select(properties, property_id, long, lat)
-
-# get data for mapping texas with counties
-### help from azaj
 
 # gets map data for texas
 texas <- map_data("state") %>%
   filter(region == "texas")
 
-# gets map data for texas counties
-texas_counties <- map_data("county") %>%
-  filter(region == "texas")
+## j. ashei cover map based on https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0173465
+jasheicover <- st_read("data/j_ashei_cover.kml")
+jasheicover <- st_coordinates(jasheicover)
+jasheicover <- as.data.frame(jasheicover)
+colnames(jasheicover) <- c("long", "lat", "z", "L1", "L2")
 
-colorscheme <- c(
-  "Bandera_2022-35" = "#AA6F9E",
-  "Burnet_2022-16" = "#1965B0",
-  "Edwards_2022-25" = "#7BAFDE",
-  "Hays-Travis_2022-02" = "#4EB265",
-  "Kerr_2021-36" = "#F7F056",
-  "Medina_2022-04" = "#EE8026",
-  "Uvalde_2021-03" = "#DC050C"
-)
+
+long_labels <- c(-98, -98.4, -101, -96.5, 
+                 -99.7, -97.7, -99.5)
+lat_labels <- c(29.9, 31.1, 29.95, 30.35,
+                30.35, 29.5, 29.2)
+
+
+## plots map
 
 ggplot(texas, aes(long, lat)) +
-  geom_polygon(color = "black", fill = "#BBBBBB") +
-  theme_bw() +
-  geom_polygon(aes(group = group), data = texas_counties,
-               fill = "NA", color = "white") +
   geom_polygon(color = "black", fill = "NA") +
-  geom_point(data = site_map, aes(color = property_id),
-             shape = 19, size = 7) +
+  geom_polygon(data = jasheicover, aes(long, lat), 
+               color = "#4EB265", fill = "#4EB265") +
+  geom_point(data = properties, shape = 19, size = 4) +
+  geom_text(data = properties, aes(label = property_id),
+            x = long_labels, y = lat_labels, size=4) +
   labs(fill = "",
        x = expression("Longitude ("*~degree*")"),
-       y = expression("Latitude ("*~degree*")"),
-       color = "Property") +
+       y = expression("Latitude ("*~degree*")")) +
   theme_bw() +
   theme(
     panel.grid = element_blank(),
@@ -54,16 +48,4 @@ ggplot(texas, aes(long, lat)) +
     axis.title = element_text(size = 20),
     axis.text = element_text(size = 18),
     panel.border = element_rect(linewidth = 2),
-    legend.title = element_text(size = 18),
-    legend.text = element_text(size = 17),
-    legend.position = c(0.15, 0.8)
-  ) +
-  scale_color_manual(values = colorscheme)
-
-
-
-#### properties table
-data <- data.frame(
-  Category = c("A", "B", "C", "D"),
-  Value = c(10, 20, 15, 25)
-)
+  )

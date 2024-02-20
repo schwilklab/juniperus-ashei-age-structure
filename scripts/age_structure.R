@@ -92,7 +92,7 @@ ggplot(trees_age, aes(year, color = "black")) +
 
 ###  linear mixed effect model 
 # distance
-dist_model <- lmer(year ~ distance + (1 |property_code) + (1 |transect_id), 
+dist_model <- lmer(year ~ distance + (1 |transect_id), 
                    data = trees_age)
 
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
@@ -140,7 +140,8 @@ ggplot(trees_age, aes(distance, year, color=property_id)) +
   scale_color_manual(values = colorscheme) +
   scale_y_continuous(breaks= seq(0, 300, 50))
 
-
+unique(trees_age$transect_id)
+count(trees_age[trees_age$transect_id == "UVB",])
 
 # taking out farthest points
 elev_model<- lmer(year ~ elev_dif + (1 |property_code) + (1 |transect_id), 

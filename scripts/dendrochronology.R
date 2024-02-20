@@ -60,6 +60,7 @@ ringwidths_slabs <- detrend(rwl = ringwidths_slabs, method = "ModNegExp")
 ringwidths_cores <- detrend(rwl = ringwidths_cores, method = "ModNegExp")
 ringwidths_ms <- detrend(rwl = ringwidths_ms, method = "ModNegExp")
 
+
 ############# cleans data ############
 # widens slabs
 ringwidths_slabs$year <- as.numeric(rownames(ringwidths_slabs))
@@ -128,7 +129,6 @@ trees_rw <- select(trees_rw, -nearest_town, -long.y, -lat.y, -year.x, -year.y,
 # removes any extra rows
 trees_rw <- trees_rw[!is.na(trees_rw$year),]
 ### note I know this is a bit inefficient but its what I have
-
 
 
 
