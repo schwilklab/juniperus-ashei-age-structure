@@ -279,8 +279,11 @@ ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 
 
 ############# same individual ring widths correlations ############# 
+# matches stems
 ringwidths_ms$individual <- str_match(ringwidths_ms$id, "^[A-Za-z]{3}[0-9]{2}")
+ringwidths_ms <- ringwidths_ms[ringwidths_ms$year >= 1970,]
 
+# colors for each indv
 colorscheme_ms <- c(
   "HTA28" = "#4477AA",
   "HTB06" = "#66CCEE",
@@ -289,6 +292,7 @@ colorscheme_ms <- c(
   "UVB04" = "#EE6677",
   "UVB16" = "#AA3377"
 )
+# makes colors for labeler
 labels_ms <- unique(ringwidths_ms$id)
 names(labels_ms) <- c("1", "2", "1", "2", "1", "2", "1", "2", "3", "4", "1", "2", 
            "1", "2")
@@ -311,6 +315,52 @@ ggplot(ringwidths_ms_recent, aes(year, ring_width, color = individual )) +
     x = "Year",
     y = "Ring width index",
     color = "Indiviual")
+
+############# appendix plots #############
+
+
+rw_series <- function(transect) {
+  # selects needed data
+  trees_rw_transect <- trees_rw[trees_rw$transect_id == transect,]
+  trees_rw_transect <- trees_rw_transect[trees_rw_transect$year >= 1970,]
+  trees_rw_transect <- trees_rw_transect[trees_rw_transect$year < 2023,]
+  # plots
+  ggplot(trees_rw_transect, aes(year, ring_width)) + 
+    geom_line(size = 0.25) + 
+    facet_wrap(~id, ncol = 1, switch = "y") +
+    scale_color_manual(values = colorscheme_ms) +
+    scale_x_continuous(breaks= seq(1970, 2020, 5)) +
+    scale_y_continuous(breaks= c(0,5)) +
+    theme_bw() +
+    theme(
+      strip.text.y.left = element_text(angle = 0),
+      strip.background = element_rect(fill = NA, linewidth = 0.5),
+      strip.text = element_text(size = 10),
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 10),
+      text = element_text(family = "Times New Roman")
+    ) +
+    labs(
+      x = "Year",
+      y = "Ring width index")
+}
+
+unique(trees_rw$property_id)
+rw_series("BAA")
+rw_series("BUA")
+rw_series("EDB")
+rw_series("HTA")
+rw_series("HTB")
+rw_series("KEA")
+rw_series("KEB")
+rw_series("KEC")
+rw_series("MEA")
+rw_series("MEB")
+rw_series("UVA")
+rw_series("UVB")
+
+
+
 
 
 ############# cross-dating using dplR############# 

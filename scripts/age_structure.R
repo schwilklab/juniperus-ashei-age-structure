@@ -58,33 +58,23 @@ max(trees_age_HT$year, na.rm = TRUE)
 # theme for plots
 theme <- theme_bw() +
   theme(
-    legend.title = element_text(size = 20),
-    legend.text = element_text(size = 16),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 14),
     strip.background = element_rect(fill = NA, linewidth = 1),
-    strip.text = element_text(size = 18),
-    axis.title = element_text(size = 24),
-    axis.text = element_text(size = 20),
+    strip.text = element_text(size = 16),
+    axis.title = element_text(size = 22),
+    axis.text = element_text(size = 18),
     panel.border = element_rect(linewidth = 2),
     text = element_text(family = "Times New Roman")
   )
 
-# color scheme
-colorscheme <- c(
-  "Bandera_2022-35" = "#AA6F9E",
-  "Burnet_2022-16" = "#1965B0",
-  "Edwards_2022-25" = "#7BAFDE",
-  "Hays-Travis_2022-02" = "#4EB265",
-  "Kerr_2021-36" = "#F7F056",
-  "Medina_2022-04" = "#EE8026",
-  "Uvalde_2021-03" = "#DC050C"
-)
 
 # ring count freq
 ggplot(trees_age, aes(year, color = "black")) + 
   geom_histogram(binwidth = 10, color = "white") + 
   labs(
-    x = "Ring Count",
-    y = "Number of Individuals"
+    x = "Ring count",
+    y = "Number of individuals"
   ) + theme +
   scale_x_continuous(breaks= seq(0, 300, 50)) +
   scale_y_continuous(breaks= seq(0, 30, 5))
@@ -108,15 +98,26 @@ dist_model_anova_coeff[1]
 trees_age_transects <- trees_age[!trees_age$transect_id == "BAB",]
 trees_age_transects <- trees_age_transects[!trees_age_transects$transect_id == "EDA",]
 
-# creates label names 
-new_trans_ids <- c("Bandera", "Burnet", "Edwards", "Hays-Travis-A", "Hays-Travis-B", 
-             "Kerr-A", "Kerr-B", "Kerr-C", "Medina-A", "Medina-B", "Uvalde-A", 
-             "Uvalde-B")
-names(new_trans_ids) <- unique(trees_age_transects$transect_id)
+# orders transects west to east
+location_order <- c("EDB", "KEA", "BUA", "UVA", "KEB", "HTA", 
+                  "UVB", "KEC", "HTB", "BAA", "MEA", "MEB")
+trees_age_transects <- trees_age_transects %>%
+  mutate(transect_id = factor(transect_id, levels = location_order)) %>%
+  arrange(transect_id)
 
+
+# creates label names 
+new_trans_ids <- c("Edwards", "Kerr-A", "Burnet", "Uvalde-A", "Kerr-B",
+                   "Hays-Travis-A", "Uvalde-B", "Kerr-C", "Hays-Travis-B",
+                   "Bandera", "Medina-A", "Medina-B")
+names(new_trans_ids) <- c("EDB", "KEA", "BUA", "UVA", "KEB", "HTA", 
+                          "UVB", "KEC", "HTB", "BAA", "MEA", "MEB")
+
+# plot
 ggplot(trees_age_transects, aes(distance, year)) + 
-  geom_point(size=4) + 
-  facet_wrap(~transect_id, nrow = 4, ncol = 3,
+  geom_point(size=4, alpha =0.8) + 
+  facet_wrap(~ transect_id, 
+             nrow = 4, ncol = 3,
              labeller = labeller(transect_id = new_trans_ids)) +
   labs(
     x = "Distance from start of transect (m)",
@@ -126,7 +127,23 @@ ggplot(trees_age_transects, aes(distance, year)) +
   theme +
   theme(legend.position = "none") +
   scale_y_continuous(breaks= seq(0, 250, 50)) 
-  
+
+
+
+###### extra plots
+
+
+# color scheme
+colorscheme <- c(
+  "Bandera_2022-35" = "#AA6F9E",
+  "Burnet_2022-16" = "#1965B0",
+  "Edwards_2022-25" = "#7BAFDE",
+  "Hays-Travis_2022-02" = "#4EB265",
+  "Kerr_2021-36" = "#F7F056",
+  "Medina_2022-04" = "#EE8026",
+  "Uvalde_2021-03" = "#DC050C"
+)
+
 ## all together
 ggplot(trees_age, aes(distance, year, color=property_id)) + 
   geom_point(size=4) + 
