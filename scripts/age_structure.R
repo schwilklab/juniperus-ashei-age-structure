@@ -8,6 +8,7 @@ library(ggplot2)
 library(elevatr) 
 library(dplyr)
 library(car)
+library(lqmm)
 
 
 KEA09 <- filter(age, id %in% c("KEA09top", "KEA09bot"))
@@ -70,8 +71,8 @@ theme <- theme_bw() +
 
 
 # ring count freq
-ggplot(trees_age, aes(year, color = "black")) + 
-  geom_histogram(binwidth = 10, color = "white") + 
+ggplot(trees_age, aes(year)) + 
+  geom_histogram(binwidth = 10, fill = "black", color = "white") + 
   labs(
     x = "Ring count",
     y = "Number of individuals"
@@ -80,9 +81,34 @@ ggplot(trees_age, aes(year, color = "black")) +
   scale_y_continuous(breaks= seq(0, 30, 5))
 
 
+# ring width freq
+trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
+summary(trees_rw_rings)
+
+ggplot(trees_rw_rings, aes(x = ring_width)) + 
+  geom_histogram(binwidth = 0.1, fill ="black") + 
+  labs(
+    x = "Ring width index (mm)",
+    y = "Number of rings"
+  ) + theme +
+  scale_x_continuous(breaks= seq(0, 14, 2)) +
+  scale_y_continuous(breaks= seq(0, 2500, 500))
+
+
+
+
+## quantile regression mixed effect model:
+trees_age_qrmem <- trees_age[!is.na(trees_age$year),]
+model <- lqmm(year ~ distance,
+              random = ~1,
+              group = transect_id,
+              tau = 0.95,
+              data = trees_age_qrmem)
+summary(model)
+
 ###  linear mixed effect model 
 # distance
-dist_model <- lmer(year ~ distance + (1 |transect_id), 
+dist_model <- lmer(year ~ distance + (1 |transect_id) + (1 |property_id), 
                    data = trees_age)
 
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
@@ -127,6 +153,31 @@ ggplot(trees_age_transects, aes(distance, year)) +
   theme +
   theme(legend.position = "none") +
   scale_y_continuous(breaks= seq(0, 250, 50)) 
+
+
+
+## plots with fire refugia
+
+trees_age_transects_sub <- subset(trees_age_transects, transect_id %in% 
+                                     c("MEA", "KEC", "MEB", "BAA", "UVB"))
+
+ggplot(trees_age_transects_sub, aes(distance, year)) + 
+  geom_point(size=4, alpha =0.8) + 
+  facet_wrap(~ transect_id, 
+             nrow = 3, ncol = 2,
+             labeller = labeller(transect_id = new_trans_ids)) +
+  labs(
+    x = "Distance from start of transect (m)",
+    y = "Ring count",
+    color = "Property"
+  ) +
+  theme +
+  theme(legend.position = "none") +
+  scale_y_continuous(breaks= seq(0, 250, 50)) 
+
+
+
+
 
 
 

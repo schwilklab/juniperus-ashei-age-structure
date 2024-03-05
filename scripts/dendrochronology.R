@@ -133,7 +133,7 @@ trees_rw <- trees_rw[!is.na(trees_rw$year),]
 
 
 ## summaries for paper
-count(age[age$year >= 200,])
+count(unique(age[age$year >= 200,]))
 summary(age$year)
 summary(trees_rw$ring_width)
 
@@ -227,13 +227,71 @@ uv_precip <- get_annual_precip(properties$lat[7], properties$long[7], "UV")
 
 
 # graph to visualize above results
-ring_size_test <- trees_rw[trees_rw$property_code == "UV",]
-ring_size_test <- ring_size_test[ring_size_test$year > 1940,]
-ggplot(ring_size_test, aes(year, ring_width)) + geom_line() + 
-  facet_wrap(~id, ncol = 1, switch = "y") +
-  scale_x_continuous(breaks = seq(min(1940), 
-                                  max(2023), by = 5))
+ring_size_test <- trees_rw[trees_rw$transect_id == "HTB",]
+ring_size_test <- ring_size_test[ring_size_test$year >= 2000,]
+ring_size_test <- subset(ring_size_test, id %in% 
+                                    c("HTB01", "HTB02", "HTB03", "HTB04", 
+                                      "HTB05", "HTB06", "HTB07", "HTB08",
+                                      "HTB09", "HTB10", "HTB11", "HTB12"))
 
+ggplot(ring_size_test, aes(year, ring_width)) + 
+  geom_line(size = 0.25) + 
+  facet_wrap(~id, ncol = 1, switch = "y") +
+  scale_x_continuous(breaks= seq(1970, 2020, 5)) +
+  scale_y_continuous(breaks= c(0,3)) +
+  theme_bw() +
+  theme(
+    strip.text.y.left = element_text(angle = 0),
+    strip.background = element_rect(fill = NA, linewidth = 0.5),
+    strip.text = element_text(size = 10),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    text = element_text(family = "Times New Roman")
+  ) +
+  labs(
+    x = "Year",
+    y = "Ring width index")
+
+
+
+
+## scatterplot of ring wdith vs precip for talk
+
+# ht locations 
+location_ht <- c( properties$lat[4], properties$long[4])
+### finds precipitation data
+precip_data_ht <- weather_history(location_ht, 
+                               start = "2000-01-01", end = "2022-12-31",
+                               hourly = "precipitation")
+
+# takes only the year
+precip_data_ht$datetime <- substr(precip_data_ht$datetime, 1,4)
+# sums years
+precip_data_ht <- precip_data_ht %>% group_by(datetime) %>% 
+  summarise(sum(hourly_precipitation)) 
+# corrects column names
+colnames(precip_data_ht)[2] <- "precip"
+colnames(precip_data_ht)[1] <- "year"
+precip_data_ht$year <- as.numeric(precip_data_ht$year)
+
+# gets ring width data
+trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
+trees_rw_ht <- trees_rw_rings[trees_rw_rings$property_code == "HT",]
+trees_rw_ht <- ring_size_test[ring_size_test$year >= 2000,]
+colnames(trees_rw_ht)[23] <- "year"
+trees_rw_ht$year <- as.numeric(trees_rw_ht$year)
+
+precip_rw_ht <- left_join(trees_rw_ht, precip_data_ht, by = "year")
+
+ggplot(precip_rw_ht, aes(precip, ring_width)) + 
+  geom_point() +
+  theme +  
+  labs(
+    x = "Annual precipitation (mm)",
+    y = "Ring width index")
+  
+
+colnames(precip_data_ht)
 
 
 ############# ring widths correlations ############# 
@@ -316,6 +374,23 @@ ggplot(ringwidths_ms_recent, aes(year, ring_width, color = individual )) +
     y = "Ring width index",
     color = "Indiviual")
 
+## graph for presentation
+
+ringwidths_ms_recent_uva <- ringwidths_ms_recent[
+  ringwidths_ms_recent[4] == "UVA02",]
+
+
+ggplot(ringwidths_ms_recent_uva, aes(year, ring_width )) + 
+  geom_line(size = 1) + 
+  facet_wrap(~id, ncol = 1, switch = "y", labeller = labeller(id = new_ids)) +
+  scale_x_continuous(breaks= seq(2000, 2022, 2)) +
+  scale_y_continuous(breaks= c(1,3,5)) +
+  theme +
+  labs(
+    x = "Year",
+    y = "Ring width index")
+
+
 ############# appendix plots #############
 
 
@@ -328,7 +403,6 @@ rw_series <- function(transect) {
   ggplot(trees_rw_transect, aes(year, ring_width)) + 
     geom_line(size = 0.25) + 
     facet_wrap(~id, ncol = 1, switch = "y") +
-    scale_color_manual(values = colorscheme_ms) +
     scale_x_continuous(breaks= seq(1970, 2020, 5)) +
     scale_y_continuous(breaks= c(0,5)) +
     theme_bw() +

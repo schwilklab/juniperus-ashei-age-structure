@@ -14,7 +14,8 @@ library(sf)
 texas <- map_data("state") %>%
   filter(region == "texas")
 
-## j. ashei cover map based on https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0173465
+## j. ashei cover map
+# source: https://www.fs.usda.gov/database/feis/plants/tree/junash/all.html
 jasheicover <- st_read("data/j_ashei_cover.kml")
 jasheicover <- st_coordinates(jasheicover)
 jasheicover <- as.data.frame(jasheicover)
