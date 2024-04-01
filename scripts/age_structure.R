@@ -97,7 +97,7 @@ ggplot(trees_rw_rings, aes(x = ring_width)) +
 
 
 
-## quantile regression mixed effect model:
+## linear quantile regression mixed effect model:
 trees_age_qrmem <- trees_age[!is.na(trees_age$year),]
 model <- lqmm(year ~ distance,
               random = ~1,
@@ -105,7 +105,6 @@ model <- lqmm(year ~ distance,
               tau = 0.95,
               data = trees_age_qrmem)
 summary(model)
-plot(model)
 
 ###  linear mixed effect model 
 # distance

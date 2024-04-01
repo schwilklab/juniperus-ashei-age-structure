@@ -315,6 +315,7 @@ pdsi <- read.csv("data/dpsi.csv")
 
 
 # 3 year rolling avg
+trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
 trees_rw_pdsi <- trees_rw_rings
 trees_rw_pdsi$rw_avg <- rollapply(trees_rw_pdsi$ring_width, width = 3, 
                                   FUN = mean, fill = NA)
@@ -331,6 +332,15 @@ ggplot(trees_pdsi, aes(value, rw_avg)) +
     x = "Palmer Drought Severity Index",
     y = "Ring width index")
 
+## model
+pdsi_model <- lmer(rw_avg ~ value + (1 |transect_id) + (1 |id), 
+                   data = trees_pdsi)
+
+pdsi_model_anova <- Anova(pdsi_model)
+# P = 0.
+
+pdsi_model_coeff = summary(pdsi_model)$coefficients
+pdsi_model_coeff[1]
 
 
 ############# ring widths correlations ############# 
