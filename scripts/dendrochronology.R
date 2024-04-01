@@ -12,12 +12,14 @@ library(lme4)
 library(stringr)
 library(openmeteo)
 library(car)
+library(zoo)
 
 # coverts raw file into readable rind width length
 ringwidths_slabs <- read.rwl("data/ringcounts_slabs.raw")
 ringwidths_cores <- read.rwl("data/ringcounts_cores.raw")
 # loads in multistemmed data
 ringwidths_ms <- read.rwl("data/ringcounts_multistemmed.raw")
+
 
 # blank objects stops code from running, so blank objects are removed
 ringwidths_slabs <- select(ringwidths_slabs, -KEB07)
@@ -55,7 +57,7 @@ age <- rbind(rw_sum_slabs, rw_sum_cores)
 # for use in dplR package
 rwi_slabs <- ringwidths_slabs
 
-## detrends data based on Fritz 2001
+## detrends 
 ringwidths_slabs <- detrend(rwl = ringwidths_slabs, method = "ModNegExp")
 ringwidths_cores <- detrend(rwl = ringwidths_cores, method = "ModNegExp")
 ringwidths_ms <- detrend(rwl = ringwidths_ms, method = "ModNegExp")
@@ -149,6 +151,18 @@ ringwidths_slabs <- na.omit(ringwidths_ms)
 
 
 ############# plots for data visualization ############# 
+theme <- theme_bw() +
+  theme(
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 14),
+    strip.background = element_rect(fill = NA, linewidth = 1),
+    strip.text = element_text(size = 16),
+    axis.title = element_text(size = 22),
+    axis.text = element_text(size = 18),
+    panel.border = element_rect(linewidth = 2),
+    text = element_text(family = "Times New Roman")
+  )
+
 # separated by site to find trends
 transect_rw <- trees_rw[trees_rw$transect_id == "KEA",]
 ggplot(transect_rw, aes(year, ring_width)) + geom_line() + 
@@ -292,6 +306,31 @@ ggplot(precip_rw_ht, aes(precip, ring_width)) +
   
 
 colnames(precip_data_ht)
+
+
+###### Palmer Drought Severity Index
+
+# data from noaa
+pdsi <- read.csv("data/dpsi.csv")
+
+
+# 3 year rolling avg
+trees_rw_pdsi <- trees_rw_rings
+trees_rw_pdsi$rw_avg <- rollapply(trees_rw_pdsi$ring_width, width = 3, 
+                                  FUN = mean, fill = NA)
+trees_rw_pdsi <- trees_rw_pdsi[trees_rw_pdsi$year > 2000,]
+
+# merge data
+trees_pdsi <- merge(pdsi, trees_rw_pdsi, by = "year")
+
+
+ggplot(trees_pdsi, aes(value, rw_avg)) + 
+  geom_jitter(width = 0.1) +  
+  theme +
+  labs(
+    x = "Palmer Drought Severity Index",
+    y = "Ring width index")
+
 
 
 ############# ring widths correlations ############# 

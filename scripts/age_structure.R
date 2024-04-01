@@ -88,10 +88,10 @@ summary(trees_rw_rings)
 ggplot(trees_rw_rings, aes(x = ring_width)) + 
   geom_histogram(binwidth = 0.1, fill ="black") + 
   labs(
-    x = "Ring width index (mm)",
-    y = "Number of rings"
-  ) + theme +
-  scale_x_continuous(breaks= seq(0, 14, 2)) +
+    x = "Ring width index",
+    y = "Frequeny of rings"
+  ) + xlim(0,14) +
+  theme +
   scale_y_continuous(breaks= seq(0, 2500, 500))
 
 
@@ -105,6 +105,7 @@ model <- lqmm(year ~ distance,
               tau = 0.95,
               data = trees_age_qrmem)
 summary(model)
+plot(model)
 
 ###  linear mixed effect model 
 # distance

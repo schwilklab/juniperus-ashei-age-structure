@@ -10,3 +10,4 @@ trees_sf <- st_as_sf(trees, coords = c("long.x", "lat.x"), crs = 4326)
 
 # writes a kml file of trees
 st_write(trees_sf, "trees.kml")
+
