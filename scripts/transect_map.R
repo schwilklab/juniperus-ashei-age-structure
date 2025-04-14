@@ -3,6 +3,7 @@ library(terra)
 library(dplyr)
 library(ggspatial)
 library(metR)
+library(patchwork)
 
 # function to create countor maps of transect
 transect_map <- function(transect_id) {
@@ -57,6 +58,7 @@ transect_map <- function(transect_id) {
                            style = north_arrow_fancy_orienteering)
 }
 
-transect_map("KEA")
-transect_map("KEB")
-transect_map("KEC")
+kea_map <- transect_map("KEA")
+keb_map <- transect_map("KEB")
+
+fig2 <- kea_map + keb_map

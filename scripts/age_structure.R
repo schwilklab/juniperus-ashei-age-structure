@@ -71,7 +71,7 @@ theme <- theme_bw() +
 
 
 # ring count freq
-ggplot(trees_age, aes(year)) + 
+fig6 <- ggplot(trees_age, aes(year)) + 
   geom_histogram(binwidth = 10, fill = "black", color = "white") + 
   labs(
     x = "Ring count",
@@ -85,7 +85,7 @@ ggplot(trees_age, aes(year)) +
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
 summary(trees_rw_rings)
 
-ggplot(trees_rw_rings, aes(x = ring_width)) + 
+fig5 <- ggplot(trees_rw_rings, aes(x = ring_width)) + 
   geom_histogram(binwidth = 0.1, fill ="black") + 
   labs(
     x = "Ring width index",
@@ -140,7 +140,7 @@ names(new_trans_ids) <- c("EDB", "KEA", "BUA", "UVA", "KEB", "HTA",
                           "UVB", "KEC", "HTB", "BAA", "MEA", "MEB")
 
 # plot
-ggplot(trees_age_transects, aes(distance, year)) + 
+fig9 <- ggplot(trees_age_transects, aes(distance, year)) + 
   geom_point(size=4, alpha =0.8) + 
   facet_wrap(~ transect_id, 
              nrow = 4, ncol = 3,

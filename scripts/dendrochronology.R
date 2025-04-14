@@ -325,7 +325,7 @@ trees_rw_pdsi <- trees_rw_pdsi[trees_rw_pdsi$year > 2000,]
 trees_pdsi <- merge(pdsi, trees_rw_pdsi, by = "year")
 
 
-ggplot(trees_pdsi, aes(value, rw_avg)) + 
+fig7 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
   geom_jitter(width = 0.1) +  
   theme +
   labs(
@@ -411,17 +411,25 @@ new_ids <- c("1", "2", "1", "2", "3", "4", "1", "2", "1", "2", "1", "2", "1", "2
 names(new_ids) <- unique(ringwidths_ms$id)
 
 
-ggplot(ringwidths_ms_recent, aes(year, ring_width, color = individual )) + 
+fig8 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
   geom_line(size = 1) + 
-  facet_wrap(~id, ncol = 1, switch = "y", labeller = labeller(id = new_ids)) +
-  scale_color_manual(values = colorscheme_ms) +
+  facet_wrap(~id, ncol = 1, switch = "y") +
   scale_x_continuous(breaks= seq(2000, 2022, 2)) +
   scale_y_continuous(breaks= c(1,3,5)) +
   theme +
   labs(
     x = "Year",
-    y = "Ring width index",
-    color = "Indiviual")
+    y = "Ring width index") +
+  # remove axis lables
+  theme(strip.text = element_blank()) +
+  # label each pannel
+  geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
+            aes(x = min(ringwidths_ms_recent$year), 
+                y = max(ringwidths_ms_recent$ring_width), 
+                label = id),
+            hjust = 0.5, vjust = 1.5, size = 4)
+
+
 
 ## graph for presentation
 
@@ -469,18 +477,18 @@ rw_series <- function(transect) {
 }
 
 unique(trees_rw$property_id)
-rw_series("BAA")
-rw_series("BUA")
-rw_series("EDB")
-rw_series("HTA")
-rw_series("HTB")
-rw_series("KEA")
-rw_series("KEB")
-rw_series("KEC")
-rw_series("MEA")
-rw_series("MEB")
-rw_series("UVA")
-rw_series("UVB")
+A1 <- rw_series("BAA")
+A2 <- rw_series("BUA")
+A3 <- rw_series("EDB")
+A4 <- rw_series("HTA")
+A5 <- rw_series("HTB")
+A6 <- rw_series("KEA")
+A7 <- rw_series("KEB")
+A8 <- rw_series("KEC")
+A9 <- rw_series("MEA")
+A10 <- rw_series("MEB")
+A11 <- rw_series("UVA")
+A12 <- rw_series("UVB")
 
 
 
