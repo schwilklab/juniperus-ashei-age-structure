@@ -39,10 +39,10 @@ fig1 <- ggplot() +
     panel.grid = element_blank(),
     strip.background = element_rect(fill = NA, linewidth = 1),
     text = element_text(family = "Times New Roman"),
-    strip.text = element_text(size = 16),
-    axis.title = element_text(size = 18),
-    axis.text = element_text(size = 16),
-    panel.border = element_rect(linewidth = 2),
+    strip.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    panel.border = element_rect(linewidth = 1.5),
   )
 
 fig1

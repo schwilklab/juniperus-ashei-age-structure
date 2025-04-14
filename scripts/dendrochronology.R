@@ -153,13 +153,13 @@ ringwidths_slabs <- na.omit(ringwidths_ms)
 ############# plots for data visualization ############# 
 theme <- theme_bw() +
   theme(
-    legend.title = element_text(size = 18),
-    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 6),
     strip.background = element_rect(fill = NA, linewidth = 1),
-    strip.text = element_text(size = 16),
-    axis.title = element_text(size = 22),
-    axis.text = element_text(size = 18),
-    panel.border = element_rect(linewidth = 2),
+    strip.text = element_text(size = 8),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 10),
+    panel.border = element_rect(linewidth = 1),
     text = element_text(family = "Times New Roman")
   )
 
@@ -325,12 +325,14 @@ trees_rw_pdsi <- trees_rw_pdsi[trees_rw_pdsi$year > 2000,]
 trees_pdsi <- merge(pdsi, trees_rw_pdsi, by = "year")
 
 
-fig7 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
+fig5 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
   geom_jitter(width = 0.1) +  
   theme +
   labs(
     x = "Palmer Drought Severity Index",
     y = "Ring width index")
+
+fig5
 
 ## model
 pdsi_model <- lmer(rw_avg ~ value + (1 |transect_id) + (1 |id), 
@@ -411,8 +413,8 @@ new_ids <- c("1", "2", "1", "2", "3", "4", "1", "2", "1", "2", "1", "2", "1", "2
 names(new_ids) <- unique(ringwidths_ms$id)
 
 
-fig8 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
-  geom_line(size = 1) + 
+fig6 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
+  geom_line(size = 0.5) + 
   facet_wrap(~id, ncol = 1, switch = "y") +
   scale_x_continuous(breaks= seq(2000, 2022, 2)) +
   scale_y_continuous(breaks= c(1,3,5)) +
@@ -427,9 +429,9 @@ fig8 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) +
             aes(x = min(ringwidths_ms_recent$year), 
                 y = max(ringwidths_ms_recent$ring_width), 
                 label = id),
-            hjust = 0.5, vjust = 1.5, size = 4)
+            hjust = 0, vjust = 1.5, size = 4)
 
-
+fig6
 
 ## graph for presentation
 

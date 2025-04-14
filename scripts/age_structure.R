@@ -59,19 +59,19 @@ max(trees_age_HT$year, na.rm = TRUE)
 # theme for plots
 theme <- theme_bw() +
   theme(
-    legend.title = element_text(size = 18),
-    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 6),
     strip.background = element_rect(fill = NA, linewidth = 1),
-    strip.text = element_text(size = 16),
-    axis.title = element_text(size = 22),
-    axis.text = element_text(size = 18),
-    panel.border = element_rect(linewidth = 2),
+    strip.text = element_text(size = 8),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 10),
+    panel.border = element_rect(linewidth = 1),
     text = element_text(family = "Times New Roman")
   )
 
 
 # ring count freq
-fig6 <- ggplot(trees_age, aes(year)) + 
+fig4 <- ggplot(trees_age, aes(year)) + 
   geom_histogram(binwidth = 10, fill = "black", color = "white") + 
   labs(
     x = "Ring count",
@@ -80,12 +80,13 @@ fig6 <- ggplot(trees_age, aes(year)) +
   scale_x_continuous(breaks= seq(0, 300, 50)) +
   scale_y_continuous(breaks= seq(0, 30, 5))
 
+fig4
 
 # ring width freq
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
 summary(trees_rw_rings)
 
-fig5 <- ggplot(trees_rw_rings, aes(x = ring_width)) + 
+fig3 <- ggplot(trees_rw_rings, aes(x = ring_width)) + 
   geom_histogram(binwidth = 0.1, fill ="black") + 
   labs(
     x = "Ring width index",
@@ -140,8 +141,8 @@ names(new_trans_ids) <- c("EDB", "KEA", "BUA", "UVA", "KEB", "HTA",
                           "UVB", "KEC", "HTB", "BAA", "MEA", "MEB")
 
 # plot
-fig9 <- ggplot(trees_age_transects, aes(distance, year)) + 
-  geom_point(size=4, alpha =0.8) + 
+fig7 <- ggplot(trees_age_transects, aes(distance, year)) + 
+  geom_point(size=2, alpha =0.8) + 
   facet_wrap(~ transect_id, 
              nrow = 4, ncol = 3,
              labeller = labeller(transect_id = new_trans_ids)) +
@@ -154,7 +155,7 @@ fig9 <- ggplot(trees_age_transects, aes(distance, year)) +
   theme(legend.position = "none") +
   scale_y_continuous(breaks= seq(0, 250, 50)) 
 
-
+fig7
 
 ## plots with fire refugia
 
