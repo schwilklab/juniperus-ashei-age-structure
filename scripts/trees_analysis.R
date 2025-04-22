@@ -283,8 +283,6 @@ ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 
 
 #### ring width comapred to Palmer Drought Severity Index ####
-
-
 # 3 year rolling avg
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
 trees_rw_pdsi <- trees_rw_rings
