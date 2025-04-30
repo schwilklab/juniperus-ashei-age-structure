@@ -1,5 +1,6 @@
 ## trees_read_clean.R
 ## Alex Bowers
+## Dylan Schwilk
 
 
 #### required packages ####
@@ -294,14 +295,14 @@ trees_rw_pdsi <- trees_rw_pdsi[trees_rw_pdsi$year > 2000,]
 trees_pdsi <- merge(pdsi, trees_rw_pdsi, by = "year")
 
 # plot of pdsi vs ring width
-fig4 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
+fig3 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
   geom_jitter(width = 0.1) +  
   theme +
   labs(
     x = "Palmer Drought Severity Index",
     y = "Ring width index")
 
-fig4
+fig3
 
 ## insignifacnt model
 pdsi_model <- lmer(rw_avg ~ value + (1 |transect_id) + (1 |id), 
@@ -325,7 +326,7 @@ ringwidths_ms$individual <- str_match(ringwidths_ms$id, "^[A-Za-z]{3}[0-9]{2}")
 ringwidths_ms <- ringwidths_ms[ringwidths_ms$year >= 1970,]
 ringwidths_ms_recent <- ringwidths_ms[ringwidths_ms$year >= 2000,]
 
-fig5 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
+fig4 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
   geom_line(size = 0.5) + 
   facet_wrap(~id, ncol = 1, switch = "y") +
   scale_x_continuous(breaks= seq(2000, 2022, 2)) +
@@ -335,7 +336,8 @@ fig5 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) +
     x = "Year",
     y = "Ring width index") +
   # remove axis lables
-  theme(strip.text = element_blank()) +
+  theme(strip.text = element_blank(),
+        panel.spacing = unit(0.5, "lines")) +
   # label each pannel
   geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
             aes(x = min(ringwidths_ms_recent$year), 
@@ -343,56 +345,7 @@ fig5 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) +
                 label = id),
             hjust = 0, vjust = 1.5, size = 4)
 
-fig5
-
-
-
-
-#### appendix plots
-rw_series <- function(transect) {
-  # selects needed data
-  trees_rw_transect <- trees_rw[trees_rw$transect_id == transect,]
-  trees_rw_transect <- trees_rw_transect[trees_rw_transect$year >= 1970,]
-  trees_rw_transect <- trees_rw_transect[trees_rw_transect$year < 2023,]
-  # plots
-  ggplot(trees_rw_transect, aes(year, ring_width)) + 
-    geom_line(size = 0.25) + 
-    facet_wrap(~id, ncol = 1, switch = "y") +
-    scale_x_continuous(breaks= seq(1970, 2020, 5)) +
-    scale_y_continuous(breaks= c(0,5)) +
-    theme_bw() +
-    theme(
-      strip.text.y.left = element_text(angle = 0),
-      strip.background = element_rect(fill = NA, linewidth = 0.5),
-      strip.text = element_text(size = 10),
-      axis.title = element_text(size = 12),
-      axis.text = element_text(size = 10),
-      text = element_text(family = "Times New Roman")
-    ) +
-    labs(
-      x = "Year",
-      y = "Ring width index")
-}
-
-A1 <- rw_series("BAA")
-A2 <- rw_series("BUA")
-A3 <- rw_series("EDB")
-A4 <- rw_series("HTA")
-A5 <- rw_series("HTB")
-A6 <- rw_series("KEA")
-A7 <- rw_series("KEB")
-A8 <- rw_series("KEC")
-A9 <- rw_series("MEA")
-A10 <- rw_series("MEB")
-A11 <- rw_series("UVA")
-A12 <- rw_series("UVB")
-
-
-
-
-
-
-
+fig4
 
 
 
@@ -411,7 +364,7 @@ trees_age$distance <- distHaversine(samplingpoint, transectpoint)
 
 #### plot of ring width summaries ####
 # ring count freq
-fig3 <- ggplot(trees_age, aes(year)) + 
+fig2 <- ggplot(trees_age, aes(year)) + 
   geom_histogram(binwidth = 10, fill = "black", color = "white") + 
   labs(
     x = "Ring count",
@@ -420,13 +373,13 @@ fig3 <- ggplot(trees_age, aes(year)) +
   scale_x_continuous(breaks= seq(0, 300, 50)) +
   scale_y_continuous(breaks= seq(0, 30, 5))
 
-fig3
+fig2
 
 # ring width freq
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
 summary(trees_rw_rings)
 
-fig2 <- ggplot(trees_rw_rings, aes(x = ring_width)) + 
+ggplot(trees_rw_rings, aes(x = ring_width)) + 
   geom_histogram(binwidth = 0.1, fill ="black") + 
   labs(
     x = "Ring width index",
@@ -435,7 +388,6 @@ fig2 <- ggplot(trees_rw_rings, aes(x = ring_width)) +
   theme +
   scale_y_continuous(breaks= seq(0, 2500, 500))
 
-fig2
 
 # linear quantile regression mixed effect model of distannce and age
 trees_age_qrmem <- trees_age[!is.na(trees_age$year),]
@@ -481,7 +433,7 @@ names(new_trans_ids) <- c("EDB", "KEA", "BUA", "UVA", "KEB", "HTA",
                           "UVB", "KEC", "HTB", "BAA", "MEA", "MEB")
 
 # plot
-fig6 <- ggplot(trees_age_transects, aes(distance, year)) + 
+fig5 <- ggplot(trees_age_transects, aes(distance, year)) + 
   geom_point(size=2, alpha =0.8) + 
   facet_wrap(~ transect_id, 
              nrow = 4, ncol = 3,
@@ -495,4 +447,4 @@ fig6 <- ggplot(trees_age_transects, aes(distance, year)) +
   theme(legend.position = "none") +
   scale_y_continuous(breaks= seq(0, 250, 50)) 
 
-fig6
+fig5
