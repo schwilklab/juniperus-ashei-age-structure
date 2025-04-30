@@ -9,17 +9,17 @@ ggsave("results/figure1.jpeg", plot = fig1,
 
 
 fig2
-ggsave("results/figure2.jpeg", plot = fig3, 
+ggsave("results/figure2.jpeg", plot = fig2, 
        width = 160, height = 160, dpi = 1200, units = "mm")
 
 fig3
-ggsave("results/figure3.jpeg", plot = fig4, 
+ggsave("results/figure3.jpeg", plot = fig3, 
        width = 160, height = 200, dpi = 1200, units = "mm")
 
 fig4
-ggsave("results/figure4.jpeg", plot = fig6, 
+ggsave("results/figure4.jpeg", plot = fig4, 
        width = 160, height = 200, dpi = 1200, units = "mm")
 
 fig5
-ggsave("results/figure5.jpeg", plot = fig6, 
+ggsave("results/figure5.jpeg", plot = fig5, 
        width = 160, height = 160, dpi = 1200, units = "mm")
