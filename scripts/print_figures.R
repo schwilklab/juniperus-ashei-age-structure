@@ -1,7 +1,7 @@
 ## manuscript_figures.R
 ## Alex Bowers
 
-### saves figures for southwest naturalist manuscipt
+### saves figures for southwest naturalist manuscript
 
 fig1
 ggsave("results/figure1.jpeg", plot = fig1, 

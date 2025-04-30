@@ -325,24 +325,44 @@ ringwidths_slabs <- na.omit(ringwidths_ms)
 ringwidths_ms$individual <- str_match(ringwidths_ms$id, "^[A-Za-z]{3}[0-9]{2}")
 ringwidths_ms <- ringwidths_ms[ringwidths_ms$year >= 1970,]
 ringwidths_ms_recent <- ringwidths_ms[ringwidths_ms$year >= 2000,]
+ringwidths_ms_recent <- ringwidths_ms_recent %>% mutate(
+  individual = gsub("_(.*)$", "", id), stem = gsub(".*_", "", id))
+
+id_names <- list(
+  'UVB16_1'="UVB16",
+  'UVB16_2'="UVB16",
+  'UVA02_1'="UVA02",
+  'UVA02_2'="UVA02",
+  'UVA02_3'="UVA02",
+  'UVA02_4'="UVA02",
+  'UVB04_1'="UVA04",
+  'UVB04_2'="UVA04",
+  'KEA03_1'="KEA03",
+  'KEA03_2'="KEA03",
+  'HTA28_1'="HTA28",
+  'HTA28_2'="HTA28",
+  'HTB06_1'="HTB06",
+  'HTB06_2'="HTB06"
+)
+id_labeller <- function(variable,value){
+  return(id_names[value])}
 
 fig4 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
   geom_line(size = 0.5) + 
-  facet_wrap(~id, ncol = 1, switch = "y") +
+  facet_wrap(~id, ncol = 1, switch = "y", labeller=id_labeller) +
   scale_x_continuous(breaks= seq(2000, 2022, 2)) +
   scale_y_continuous(breaks= c(1,3,5)) +
-  theme +
   labs(
     x = "Year",
     y = "Ring width index") +
+  theme +
   # remove axis lables
-  theme(strip.text = element_blank(),
-        panel.spacing = unit(0.5, "lines")) +
+  theme(panel.spacing = unit(0.5, "lines")) +
   # label each pannel
   geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
             aes(x = min(ringwidths_ms_recent$year), 
                 y = max(ringwidths_ms_recent$ring_width), 
-                label = id),
+                label = stem),
             hjust = 0, vjust = 1.5, size = 4)
 
 fig4
@@ -439,7 +459,7 @@ fig5 <- ggplot(trees_age_transects, aes(distance, year)) +
              nrow = 4, ncol = 3,
              labeller = labeller(transect_id = new_trans_ids)) +
   labs(
-    x = "Distance from start of transect (m)",
+    x = "Horizontal distance from start of transect (m)",
     y = "Ring count",
     color = "Property"
   ) +
