@@ -81,7 +81,7 @@ fig1 <- ggplot() +
   # cover
   geom_sf(data = jasheicover, aes(geometry = geometry), 
           fill = "#4EB265", color = "#4EB265") +
-  # boudnign box
+  # bounding box
   coord_sf(xlim = c(-107, -91), ylim = c(25,37), expand = FALSE) +
   # adds property locations
   geom_point(data = properties, aes(long, lat), shape = 19, size = 2) +

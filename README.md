@@ -1,5 +1,10 @@
-# juniper-fire
-Alex Bowers' MS project
+# juniperus-ashei-age-structure
+
+Alex Bowers' MS project. For submission to Southwestern Naturalist
+
+NO RECENT INVADER: SPATIAL AGE STRUCTURE OF JUNIPERUS ASHEI IN CENTRAL TEXAS
+
+D. Alex Bowers, Nathan S. Gill, Dylan W. Schwilk
 
 
 ## Organization ##
