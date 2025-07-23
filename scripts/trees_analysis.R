@@ -1,7 +1,9 @@
-## trees_read_clean.R
+#!/usr/bin/env Rscript
+
+## trees_analysis.R
 ## Alex Bowers
 ## Dylan Schwilk
-
+## 2025
 
 #### required packages ####
 # core
@@ -45,25 +47,22 @@ pdsi <- read.csv("data/dpsi.csv")
 
 
 #### theme for plots ####
-theme <- theme_bw() +
+pubtheme <- theme_bw() +
   theme(
     legend.title = element_text(size = 10),
     legend.text = element_text(size = 6),
     strip.background = element_rect(fill = NA, linewidth = 1),
-    strip.text = element_text(size = 8),
-    axis.title = element_text(size = 14),
-    axis.text = element_text(size = 10),
-    panel.border = element_rect(linewidth = 1),
-    text = element_text(family = "Times New Roman")
+    strip.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+   # strip.text = element_text(size = 8),
+   # axis.title = element_text(size = 14),
+   # axis.text = element_text(size = 10),
+    panel.border = element_rect(linewidth = 1.5),
+    text = element_text(family = "Times New Roman"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank()
   )
-
-
-
-
-
-
-
-
 
 
 ################################################################
@@ -91,25 +90,11 @@ fig1 <- ggplot() +
        x = expression("Longitude"),
        y = expression("Latitude")) +
   theme_bw() +
-  theme(
-    panel.grid = element_blank(),
-    strip.background = element_rect(fill = NA, linewidth = 1),
-    text = element_text(family = "Times New Roman"),
-    strip.text = element_text(size = 14),
-    axis.title = element_text(size = 16),
-    axis.text = element_text(size = 14),
-    panel.border = element_rect(linewidth = 1.5),
-  )
+  pubtheme
 
 fig1
-
-
-
-
-
-
-
-
+ggsave("results/figure1.jpg", plot = fig1, 
+       width = 190, height = 160, dpi = 1200, units = "mm")
 
 
 ################################################
@@ -260,7 +245,7 @@ plot(chronology_slabs, add.spline=TRUE, nyrs=30)
 
 #### ring widths correlations ####
 # summary stats for each year
-year_corr <- function(year){
+year_corr <- function(year) {
   year_rw <- trees_rw[trees_rw$year == year,]
   summary(year_rw$ring_width)
 }
@@ -281,8 +266,6 @@ ke_trees_rw <- ke_trees_rw[ke_trees_rw$year > 2000,]
 ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 
 
-
-
 #### ring width comapred to Palmer Drought Severity Index ####
 # 3 year rolling avg
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
@@ -296,23 +279,25 @@ trees_pdsi <- merge(pdsi, trees_rw_pdsi, by = "year")
 
 # plot of pdsi vs ring width
 fig3 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
-  geom_jitter(width = 0.1) +  
-  theme +
+  geom_jitter(width = 0.1, alpha=0.65) +  
+  pubtheme +
   labs(
     x = "Palmer Drought Severity Index",
     y = "Ring width index")
-
 fig3
 
-## insignifacnt model
+ggsave("results/figure3.jpg", plot = fig3, 
+       width = 160, height = 200, dpi = 1200, units = "mm")
+
+
+## poor model
 pdsi_model <- lmer(rw_avg ~ value + (1 |transect_id) + (1 |id), 
                    data = trees_pdsi)
 
 pdsi_model_anova <- Anova(pdsi_model)
 # P = 0.
-pdsi_model_coeff = summary(pdsi_model)$coefficients
+pdsi_model_coeff <- summary(pdsi_model)$coefficients
 pdsi_model_coeff[1]
-
 
 
 #### Multistemmed data #### 
@@ -327,6 +312,9 @@ ringwidths_ms <- ringwidths_ms[ringwidths_ms$year >= 1970,]
 ringwidths_ms_recent <- ringwidths_ms[ringwidths_ms$year >= 2000,]
 ringwidths_ms_recent <- ringwidths_ms_recent %>% mutate(
   individual = gsub("_(.*)$", "", id), stem = gsub(".*_", "", id))
+
+
+## DWS: Why is this data hard coded? Look at str_split! isn;t this just $individual?
 
 id_names <- list(
   'UVB16_1'="UVB16",
@@ -344,29 +332,60 @@ id_names <- list(
   'HTB06_1'="HTB06",
   'HTB06_2'="HTB06"
 )
-id_labeller <- function(variable,value){
-  return(id_names[value])}
+id_labeller <- function(variable,value) {
+  return(id_names[value])
+}
 
-fig4 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
+## fig4 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
+##   geom_line(size = 0.5) + 
+##   facet_wrap(~id, ncol = 1, switch = "y", labeller=id_labeller) +
+##   scale_x_continuous(breaks= seq(2000, 2022, 2)) +
+##   scale_y_continuous(breaks= c(1,3,5)) +
+##   labs(
+##     x = "Year",
+##     y = "Ring width index") +
+##   pubtheme +
+##   # remove axis labels
+  #theme(panel.spacing = unit(0.5, "lines")) +
+  # label each panel
+  ## geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
+  ##           aes(x = min(ringwidths_ms_recent$year), 
+  ##               y = max(ringwidths_ms_recent$ring_width), 
+  ##               label = stem),
+  ##           hjust = 0, vjust = 1.5, size = 4)
+
+
+## DWS: I'd change facet labels to simply show county/site
+
+
+fig4data <- ringwidths_ms_recent
+fig4data$property_code <- str_sub(fig4data$id, 1,2)
+fig4data$individual_code <- str_sub(fig4data$id, 3,5)
+fig4data <- left_join(fig4data, properties)
+fig4data$newid <- str_c(fig4data$county, " ", fig4data$individual_code)
+
+
+fig4 <- ggplot(fig4data, aes(year, ring_width, group=id)) + 
   geom_line(size = 0.5) + 
-  facet_wrap(~id, ncol = 1, switch = "y", labeller=id_labeller) +
-  scale_x_continuous(breaks= seq(2000, 2022, 2)) +
+  facet_grid(newid ~ .) +
+  scale_x_continuous(breaks= seq(2000, 2022, 4)) +
   scale_y_continuous(breaks= c(1,3,5)) +
   labs(
     x = "Year",
     y = "Ring width index") +
-  theme +
+  pubtheme
   # remove axis lables
-  theme(panel.spacing = unit(0.5, "lines")) +
+#  theme(panel.spacing = unit(0.5, "lines")) +
   # label each pannel
-  geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
-            aes(x = min(ringwidths_ms_recent$year), 
-                y = max(ringwidths_ms_recent$ring_width), 
-                label = stem),
-            hjust = 0, vjust = 1.5, size = 4)
+  ## geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
+  ##           aes(x = min(ringwidths_ms_recent$year), 
+  ##               y = max(ringwidths_ms_recent$ring_width), 
+  ##               label = stem),
+  ##           hjust = 0, vjust = 1.5, size = 4)
 
 fig4
-
+ggsave("results/figure4.jpg", plot = fig4, 
+       width = 160, height = 240, dpi = 1200, units = "mm")
 
 
 #########################################
@@ -389,11 +408,14 @@ fig2 <- ggplot(trees_age, aes(year)) +
   labs(
     x = "Ring count",
     y = "Number of individuals"
-  ) + theme +
+  ) + pubtheme +
   scale_x_continuous(breaks= seq(0, 300, 50)) +
   scale_y_continuous(breaks= seq(0, 30, 5))
 
 fig2
+ggsave("results/figure2.jpg", plot = fig2, 
+       width = 160, height = 160, dpi = 1200, units = "mm")
+
 
 # ring width freq
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
@@ -405,7 +427,7 @@ ggplot(trees_rw_rings, aes(x = ring_width)) +
     x = "Ring width index",
     y = "Frequeny of rings"
   ) + xlim(0,14) +
-  theme +
+  pubtheme +
   scale_y_continuous(breaks= seq(0, 2500, 500))
 
 
@@ -426,12 +448,12 @@ dist_model <- lmer(year ~ distance + (1 |transect_id) + (1 |property_id),
 dist_model_anova = Anova(dist_model, type = 2, test.statistic = "F")
 # P = 0.9284, not significant
 
-dist_model_anova_coeff = summary(dist_model)$coefficients
+dist_model_anova_coeff <- summary(dist_model)$coefficients
 dist_model_anova_coeff[1]
 
 
 
-###plots
+### plots
 # Linear Mixed effect model
 # removes transects that were discarded 
 trees_age_transects <- trees_age[!trees_age$transect_id == "BAB",]
@@ -463,8 +485,10 @@ fig5 <- ggplot(trees_age_transects, aes(distance, year)) +
     y = "Ring count",
     color = "Property"
   ) +
-  theme +
+  pubtheme +
   theme(legend.position = "none") +
   scale_y_continuous(breaks= seq(0, 250, 50)) 
 
 fig5
+ggsave("results/figure5.jpg", plot = fig5, 
+       width = 160, height = 160, dpi = 1200, units = "mm")
