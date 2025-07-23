@@ -6,6 +6,7 @@ NO RECENT INVADER: SPATIAL AGE STRUCTURE OF JUNIPERUS ASHEI IN CENTRAL TEXAS
 
 D. Alex Bowers, Nathan S. Gill, Dylan W. Schwilk
 
+[![DOI](https://zenodo.org/badge/623126273.svg)](https://doi.org/10.5281/zenodo.16375363)
 
 ## Organization ##
 
