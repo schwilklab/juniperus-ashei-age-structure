@@ -130,7 +130,7 @@ ringwidths_slabs <- select(ringwidths_slabs, -UVA02)
 ringwidths_slabs <- select(ringwidths_slabs, -UVA04)
 # corrects incorrect names
 colnames(ringwidths_ms)[7] <- "UVB04_1"
-colnames(ringwidths_slabs)[158] <- "KEB12"
+
 colnames(ringwidths_slabs)[255] <- "UVB11"
 # oldest stem
 colnames(ringwidths_slabs)[192] <- "UVA02"
@@ -351,7 +351,7 @@ fig4data$newid <- str_c(fig4data$county, " ", fig4data$individual_code)
 
 
 fig4 <- ggplot(fig4data, aes(year, ring_width, group=id)) + 
-  geom_line(size = 0.5) + 
+  geom_line(linewidth = 0.5) + 
   facet_grid(newid ~ .) +
   scale_x_continuous(breaks= seq(2000, 2022, 4)) +
   scale_y_continuous(breaks= c(1,3,5)) +
@@ -477,3 +477,47 @@ fig5 <- ggplot(trees_age_transects, aes(distance, year)) +
 fig5
 ggsave("results/figure5.jpg", plot = fig5, 
        width = 160, height = 160, dpi = 1200, units = "mm")
+
+
+
+#### appendix plots
+rw_series <- function(transect) {
+  # selects needed data
+  trees_rw_transect <- trees_rw[trees_rw$transect_id == transect,]
+  trees_rw_transect <- trees_rw_transect[trees_rw_transect$year >= 1970,]
+  trees_rw_transect <- trees_rw_transect[trees_rw_transect$year < 2023,]
+  # plots
+  ggplot(trees_rw_transect, aes(year, ring_width)) + 
+    geom_line(size = 0.25) + 
+    facet_wrap(~id, ncol = 1, switch = "y") +
+    scale_x_continuous(breaks= seq(1970, 2020, 5)) +
+    scale_y_continuous(breaks= c(0,5)) +
+    theme_bw() +
+    theme(
+      strip.text.y.left = element_text(angle = 0),
+      strip.background = element_rect(fill = NA, linewidth = 0.5),
+      strip.text = element_text(size = 10),
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 10),
+      text = element_text(family = "Times New Roman")
+    ) +
+    labs(
+      x = "Year",
+      y = "Ring width index")
+}
+
+A1 <- rw_series("BAA")
+A2 <- rw_series("BUA")
+A3 <- rw_series("EDB")
+A4 <- rw_series("HTA")
+A5 <- rw_series("HTB")
+A6 <- rw_series("KEA")
+A7 <- rw_series("KEB")
+A8 <- rw_series("KEC")
+A9 <- rw_series("MEA")
+A10 <- rw_series("MEB")
+A11 <- rw_series("UVA")
+A12 <- rw_series("UVB")
+
+
+
