@@ -85,6 +85,13 @@ fig1 <- ggplot() +
   coord_sf(xlim = c(-107, -91), ylim = c(25,37), expand = FALSE) +
   # adds property locations
   geom_point(data = properties, aes(long, lat), shape = 19, size = 2) +
+  geom_text(
+    data = properties,
+    aes(x = long, y = lat, label = property_code),
+    size = 3,
+    vjust = 0.5,   
+    hjust = 1.3
+  ) +
   # theme
   labs(fill = "",
        x = expression("Longitude"),
@@ -314,7 +321,7 @@ ringwidths_ms_recent <- ringwidths_ms_recent %>% mutate(
   individual = gsub("_(.*)$", "", id), stem = gsub(".*_", "", id))
 
 
-## DWS: Why is this data hard coded? Look at str_split! isn;t this just $individual?
+
 
 id_names <- list(
   'UVB16_1'="UVB16",
@@ -335,28 +342,6 @@ id_names <- list(
 id_labeller <- function(variable,value) {
   return(id_names[value])
 }
-
-## fig4 <- ggplot(ringwidths_ms_recent, aes(year, ring_width)) + 
-##   geom_line(size = 0.5) + 
-##   facet_wrap(~id, ncol = 1, switch = "y", labeller=id_labeller) +
-##   scale_x_continuous(breaks= seq(2000, 2022, 2)) +
-##   scale_y_continuous(breaks= c(1,3,5)) +
-##   labs(
-##     x = "Year",
-##     y = "Ring width index") +
-##   pubtheme +
-##   # remove axis labels
-  #theme(panel.spacing = unit(0.5, "lines")) +
-  # label each panel
-  ## geom_text(data = ringwidths_ms_recent %>% group_by(id) %>% slice(1),
-  ##           aes(x = min(ringwidths_ms_recent$year), 
-  ##               y = max(ringwidths_ms_recent$ring_width), 
-  ##               label = stem),
-  ##           hjust = 0, vjust = 1.5, size = 4)
-
-
-## DWS: I'd change facet labels to simply show county/site
-
 
 fig4data <- ringwidths_ms_recent
 fig4data$property_code <- str_sub(fig4data$id, 1,2)
