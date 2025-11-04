@@ -277,15 +277,13 @@ ggplot(ke_trees_rw, aes(factor(year), ring_width)) + geom_boxplot()
 # 3 year rolling avg
 trees_rw_rings <- distinct(trees_rw, id, year ,.keep_all = TRUE)
 trees_rw_pdsi <- trees_rw_rings
-trees_rw_pdsi$rw_avg <- rollapply(trees_rw_pdsi$ring_width, width = 3, 
-                                  FUN = mean, fill = NA)
 trees_rw_pdsi <- trees_rw_pdsi[trees_rw_pdsi$year > 2000,]
 
 # merge data
 trees_pdsi <- merge(pdsi, trees_rw_pdsi, by = "year")
 
 # plot of pdsi vs ring width
-fig3 <- ggplot(trees_pdsi, aes(value, rw_avg)) + 
+fig3 <- ggplot(trees_pdsi, aes(value, ring_width)) + 
   geom_jitter(width = 0.1, alpha=0.65) +  
   pubtheme +
   labs(
@@ -298,7 +296,7 @@ ggsave("results/figure3.jpg", plot = fig3,
 
 
 ## poor model
-pdsi_model <- lmer(rw_avg ~ value + (1 |transect_id) + (1 |id), 
+pdsi_model <- lmer(ring_width ~ value + (1 |transect_id) + (1 |id), 
                    data = trees_pdsi)
 
 pdsi_model_anova <- Anova(pdsi_model)
