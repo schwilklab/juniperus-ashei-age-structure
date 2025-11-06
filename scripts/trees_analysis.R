@@ -487,7 +487,7 @@ rw_series <- function(transect) {
   # plots
   ggplot(trees_rw_transect, aes(year, ring_width)) + 
     geom_line(size = 0.25) + 
-    facet_wrap(~id, ncol = 1, switch = "y") +
+    facet_wrap(~id, ncol = 1, strip.position = "left") +
     scale_x_continuous(breaks= seq(1970, 2020, 5)) +
     scale_y_continuous(breaks= c(0,5)) +
     theme_bw() +
@@ -504,6 +504,7 @@ rw_series <- function(transect) {
       y = "Ring width index")
 }
 
+
 A1 <- rw_series("BAA")
 A2 <- rw_series("BUA")
 A3 <- rw_series("EDB")
@@ -518,4 +519,27 @@ A11 <- rw_series("UVA")
 A12 <- rw_series("UVB")
 
 
-
+ggsave("results/appendix1.jpg", plot = A1, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix2.jpg", plot = A2, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix3.jpg", plot = A3, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix4.jpg", plot = A4, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix5.jpg", plot = A5, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix6.jpg", plot = A6, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix7.jpg", plot = A7, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix8.jpg", plot = A8, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix9.jpg", plot = A9, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix10.jpg", plot = A10, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix11.jpg", plot = A11, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
+ggsave("results/appendix12.jpg", plot = A12, 
+       width = 160, height = 220, dpi = 1200, units = "mm")
